@@ -1,6 +1,6 @@
 {
   "name": "@rx-projects/common",
-  "version": "1.0.45",
+  "version": "1.0.1",
   "description": "",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",

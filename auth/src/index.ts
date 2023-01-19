@@ -13,8 +13,6 @@ const start = async () => {
     throw new Error('MONGO_URI must be defined');
   }
    
-  //Uncomment it if you are using nats & set secrets for ids in auth-depl.yaml
-
   if (!process.env.NATS_CLUSTER_ID) {
     throw new Error('NATS_CLUSTER_ID must be defined');
   }
@@ -42,7 +40,6 @@ const start = async () => {
     process.on('SIGTERM', () => natsWrapper.client.close());
     
     mongoose.set('strictQuery', false)
-    //Currently we are using mongo image from docker
     await mongoose.connect(process.env.MONGO_URI);
     
      

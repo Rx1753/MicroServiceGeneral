@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: projectName/auth
+          image: rxProjects/auth
           env:
             - name: NATS_CLIENT_ID
               valueFrom:
