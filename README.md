@@ -11,13 +11,14 @@ To create general service for Auth
 
 * Create account & organization
 * cd common
-* git init
-* git add .
-* git commit -m "initial commit"
-* npm publish --access public
+* `git init`
+* `git add .`
+* `git commit -m "initial commit"`
+* `npm publish --access public`
 
 2) Setup local host in terminal: 
-* code /etc/hosts 
+* `code /etc/hosts` 
+
   eg : 127.0.0.1 domain name
 
 3) Install Docker in system
@@ -26,13 +27,13 @@ To create general service for Auth
 
  Create Auth service with src folder & Docker file
 
-  - index.ts : Db & nats setup 
-  - app.ts : set up for routers
+   - index.ts : Db & nats setup 
+   - app.ts : set up for routers
 
-* Create Docker image 
+ Create Docker image 
 
-  - `docker build -t dockerAccountName/servicename .`
-  - `docker push dockerAccountName/servicename`
+   - `docker build -t dockerAccountName/servicename .`
+   - `docker push dockerAccountName/servicename`
 
 ## Infra/k8s
 
