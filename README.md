@@ -1,10 +1,12 @@
 # MicroServiceGeneral
-Create project : npm init
-Tyscript Support :  tsc --init
+
+Create project : `npm init` 
+
+Tyscript Support :  `tsc --init`
 
 To create general service for Auth 
 
-## SetUp :
+## SetUp
 1) Common module consits of Error handling & Nats
 
 * Create account & organization
