@@ -65,8 +65,8 @@ To delete services & depl:
 * `kubectl rollout restart deployment posts-depl` //To restart deployment
 
 // nats local
-* Kubectl get pods
-* Kubectl port-forward nats podname 4222:4222
+* `kubectl get pods`
+* `kubectl port-forward nats podname 4222:4222`
 
 * `docker ps` //to see list 
 * `docker exec -it` 
