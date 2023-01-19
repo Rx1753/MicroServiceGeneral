@@ -4,7 +4,7 @@ Tyscript Support :  tsc --init
 
 To create general service for Auth 
 
-*SetUp :* 
+#SetUp :
 1) Common module consits of Error handling & Nats
 
 * Create account & organization
@@ -21,7 +21,7 @@ To create general service for Auth
 3) Install Docker in system
 
 *Services:*
-Create Auth service with src folder & Docker file
+ Create Auth service with src folder & Docker file
  - index.ts : Db & nats setup 
  - app.ts : set up for routers
 
@@ -30,7 +30,7 @@ Create Auth service with src folder & Docker file
   docker push dockerAccountName/servicename
 
 *Infra/k8s:*
- Services will be used as an image and run that docker file into kubernets using depl files in infra
+  Services will be used as an image and run that docker file into kubernets using depl files in infra
   - auth-depl.yaml: auth service with image name & env variables
   - auth-mongo.depl.yaml: port and mongo db volumes in defined to run it in kubernets
   - ingress-srv.yaml: local host routing setup to run it in kubernets
