@@ -25,12 +25,14 @@ To create general service for Auth
 ## Services
 
  Create Auth service with src folder & Docker file
- - index.ts : Db & nats setup 
- - app.ts : set up for routers
+
+  - index.ts : Db & nats setup 
+  - app.ts : set up for routers
 
 * Create Docker image 
-  docker build -t dockerAccountName/servicename . 
-  docker push dockerAccountName/servicename
+
+  - `docker build -t dockerAccountName/servicename .`
+  - `docker push dockerAccountName/servicename`
 
 ## Infra/k8s
 
@@ -50,20 +52,20 @@ To create general service for Auth
 Creating a Secret: Kubectl create secret generic jet-secret—from-literal=jwt=asdf
 
 To delete services & depl:
-* kubectl delete --all deployment
-* kubectl delete --all services
+* `kubectl delete --all deployment`
+* `kubectl delete --all services`
 
 ## Useful commands for Kubernets & Docker
 
-* kubectl get deployments
-* kubectl get pods
-* kubectl get services  //get all services from kubernets
-* kubectl describe service posts-srv //Describe services
-* kubectl rollout restart deployment posts-depl //To restart deployment
+* `kubectl get deployments`
+* `kubectl get pods`
+* `kubectl get services`  //get all services from kubernets
+* `kubectl describe service posts-srv` //Describe services
+* `kubectl rollout restart deployment posts-depl` //To restart deployment
 
 // nats local
 * Kubectl get pods
 * Kubectl port-forward nats podname 4222:4222
 
-* docker ps //to see list 
-* docker exec -it 
+* `docker ps` //to see list 
+* `docker exec -it` 
