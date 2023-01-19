@@ -29,7 +29,7 @@ spec:
               "2",
               "-SD",
               "-cid",
-              "rxshop",
+              "rxprojects",
             ]
 ---
 apiVersion: v1

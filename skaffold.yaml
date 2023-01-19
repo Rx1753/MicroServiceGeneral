@@ -8,7 +8,7 @@ build:
   local:
     push: false
   artifacts:
-    - image: rxProjects/auth
+    - image: rxprojects/auth
       context: auth
       docker:
         dockerfile: Dockerfile

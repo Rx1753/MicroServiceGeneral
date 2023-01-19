@@ -12,7 +12,7 @@ const start = async () => {
   if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI must be defined');
   }
-   
+
   if (!process.env.NATS_CLUSTER_ID) {
     throw new Error('NATS_CLUSTER_ID must be defined');
   }
@@ -42,7 +42,8 @@ const start = async () => {
     mongoose.set('strictQuery', false)
     await mongoose.connect(process.env.MONGO_URI);
     
-     
+ 
+    
   } catch (error: any) {
     throw Error(error);
   }

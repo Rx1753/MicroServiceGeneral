@@ -2,6 +2,7 @@ import express from 'express';
 import 'express-async-errors';
 import bodyParser from 'body-parser';
 import cookieSession from 'cookie-session';
+import { errorHandler, NotFoundError } from '@rx-projects/common';
 
 const app = express();
 
@@ -15,5 +16,10 @@ app.use(
     secure: true, // use cookie only on https connection
   })
 );
+
+app.all('*', async () => {
+  throw new NotFoundError();
+});
+app.use(errorHandler);
 
 export { app };
