@@ -4,7 +4,7 @@ Tyscript Support :  tsc --init
 
 To create general service for Auth 
 
-**SetUp :** 
+## SetUp :
 1) Common module consits of Error handling & Nats
 
 * Create account & organization
@@ -20,7 +20,8 @@ To create general service for Auth
 
 3) Install Docker in system
 
-**Services**
+## Services
+
  Create Auth service with src folder & Docker file
  - index.ts : Db & nats setup 
  - app.ts : set up for routers
@@ -29,7 +30,8 @@ To create general service for Auth
   docker build -t dockerAccountName/servicename . 
   docker push dockerAccountName/servicename
 
-**Infra/k8s**
+## Infra/k8s
+
   Services will be used as an image and run that docker file into kubernets using depl files in infra
   - auth-depl.yaml: auth service with image name & env variables
   - auth-mongo.depl.yaml: port and mongo db volumes in defined to run it in kubernets
@@ -41,14 +43,15 @@ To create general service for Auth
 * Run app in local env using Skaffold
   skaffold dev  
 
-**Kubernets**
+## Kubernets
+
 Creating a Secret: Kubectl create secret generic jet-secret—from-literal=jwt=asdf
 
 To delete services & depl:
 * kubectl delete --all deployment
 * kubectl delete --all services
 
-**Useful commands for Kubernets & Docker**
+## Useful commands for Kubernets & Docker
 
 * kubectl get deployments
 * kubectl get pods
@@ -57,7 +60,7 @@ To delete services & depl:
 * kubectl rollout restart deployment posts-depl //To restart deployment
 
 // nats local
-* Kubectl get pods;
+* Kubectl get pods
 * Kubectl port-forward nats podname 4222:4222
 
 * docker ps //to see list 
