@@ -53,7 +53,7 @@ const AdminSchema = new mongoose.Schema(
     isMobileVerified: { type: Boolean, default: false },
     imageUrl: { type: String, default: '' },
     isSuperAdmin: { type: Boolean, default: false },
-    createdBy: { type: String, default: null, ref: 'admin' },
+    createdBy: { type: String, default: null, ref: 'Admin' },
     updatedBy: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
     refreshToken: { type: String },
@@ -91,7 +91,7 @@ AdminSchema.statics.build = (attrs: AdminAttrs) => {
 
 // Model
 const Admin = mongoose.model<AdminDoc, AdminModel>(
-  'admin',
+  'Admin',
   AdminSchema
 );
 

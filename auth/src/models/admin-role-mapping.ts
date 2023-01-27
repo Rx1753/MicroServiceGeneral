@@ -25,7 +25,7 @@ interface AdminRoleMappingModel extends mongoose.Model<AdminRoleMappingDoc> {
 const AdminRoleMappingSchema = new mongoose.Schema(
   {
     roleId: { type: String, ref: 'AdminRole' },
-    permissionId: { type: String, ref: 'adminPermissions' },
+    permissionId: { type: String, ref: 'AdminPermissions' },
     createdAt: { type: Number, default: () => Date.now() },
     updatedAt: { type: Number, default: () => Date.now() },
   },

@@ -26,6 +26,7 @@ spec:
               value: rxprojects
             - name: MONGO_URI
               value: mongodb://auth-mongo-srv:27017/auth
+              #value: mongodb+srv://akash:akash@cluster0.4gzjhma.mongodb.net/general_auth_rav              
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:

@@ -53,6 +53,6 @@ adminPermissionSchema.statics.build = (attrs: AdminPermissionsAttrs) => {
 const AdminPermissions = mongoose.model<
   AdminPermissionsDoc,
   AdminPermissionsModel
->('adminPermissions', adminPermissionSchema);
+>('AdminPermissions', adminPermissionSchema);
 
 export { AdminPermissions };

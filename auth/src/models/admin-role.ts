@@ -4,12 +4,16 @@ import mongoose from 'mongoose';
 // that are required to create AdminRole
 export interface AdminRoleAttrs {
   name: string;
+  createdAt?:any;
+  updatedAt?:any;
 }
 
 // An interface that describe the properties
 // that AdminRole document has
 export interface AdminRoleDoc extends mongoose.Document {
   name: string;
+  createdAt?:any;
+  updatedAt?:any;
 }
 
 // An interface that describe the properties
@@ -22,16 +26,16 @@ interface AdminRoleModel extends mongoose.Model<AdminRoleDoc> {
 const AdminRoleSchema = new mongoose.Schema(
   {
     name: { type: String },
-    createdAt: { type: Number, default: () => Date.now() },
-    updatedAt: { type: Number, default: () => Date.now() },
   },
   {
     toJSON: {
       transform(doc, ret) {
+        ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
       },
     },
+    timestamps: true,
   }
 );
 
