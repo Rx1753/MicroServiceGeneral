@@ -11,6 +11,12 @@ import { AdminRoleAttrs, AdminRole } from '../models/admin-role';
 import mongoose from 'mongoose';
 import { JwtService } from '../services/jwt';
 import { PayloadType } from '../services/string-values';
+import { OtpCode } from '../models/otp-code';
+import { OtpGenerator } from '../services/otp';
+import { Common } from '../services/common';
+import { MailService } from '../services/mail_service';
+import { clouddebugger } from 'googleapis/build/src/apis/clouddebugger';
+import { gmail } from 'googleapis/build/src/apis/gmail';
 
 export class AdminDatase {
   static async checkPermissionExist(data: AdminPermissionsAttrs) {
@@ -265,6 +271,15 @@ export class AdminDatase {
     //Triggers for Email/Phone Sign up
     if (user.email != null) {
       //TODO email trigger
+      await MailService.mailTrigger(
+        user.email,
+        'Admin Credentials',
+        '<h1>Hello,</h1><p>here, is your admin credentials,</br> pls enter it when you login to application as admin <B> Email:' +
+          user.email +
+          '</br>Password:' +
+          user.password +
+          '</B> . </p>'
+      );
     } else {
       //TODO sms trigger
     }
@@ -391,7 +406,7 @@ export class AdminDatase {
         })
       );
       return {
-        data: list,
+        data: finalArray,
       };
     } else {
       throw new BadRequestError(`No Data Found for #${req.params.roleId}`);
@@ -412,21 +427,16 @@ export class AdminDatase {
   }
 
   // update refresh token in admin user
-  static async updateRefreshToken(
-    id: string,
-    email: string,
-    phoneNumber: Number
-  ) {
-    const refreshToken = await JwtService.refreshToken({
-      email: email,
-      id: id,
-      phoneNumber: phoneNumber,
-      type: PayloadType.AdminType,
-    });
+  static async updateRefreshToken(id: string, email: string) {
+    const refreshToken = await JwtService.refreshToken(
+      id,
+      email,
+      PayloadType.AdminType
+    );
     const admin = await Admin.findByIdAndUpdate(id, {
       refreshToken: refreshToken,
     });
-    return admin?.refreshToken;
+    return refreshToken;
   }
 
   static async getAdminList(req: any) {
@@ -552,6 +562,111 @@ export class AdminDatase {
         isActive: true,
       });
       return data;
+    }
+  }
+
+  static async forgotPasswordMailTrigger(req: Request) {
+    try {
+      const { email } = req.body;
+      const emailData = await Admin.findOne({ email: email });
+      if (!emailData) {
+        throw new BadRequestError("Email doesn't exists");
+      }
+      if (emailData.allowChangePassword) {
+        //Generate OTP
+        const code = OtpGenerator.getOtp();
+        const expirationTime = Common.addSecondsToDate(60);
+
+        var isOtpExists = await OtpCode.findOne({
+          type: 'email',
+          email: email,
+        });
+
+        //Create OTP instance in DB
+        if (isOtpExists) {
+          await OtpCode.findByIdAndUpdate(isOtpExists.id, {
+            type: 'email',
+            email: email,
+            code: code,
+            expirationTime: expirationTime,
+          });
+        } else {
+          var createVerificationCode = OtpCode.build({
+            type: 'email',
+            email: email,
+            code: code,
+            expirationTime: expirationTime,
+          });
+          await createVerificationCode.save();
+
+          //Trigger mail
+          // await MailService.mailTrigger(
+          //   req.body.email,
+          //   'Forgot Password ',
+          //   '<h1>Hi' +
+          //     emailData.userName +
+          //     '</h1><p>Please use this verification code to change your current password,</br> ' +
+          //     code +
+          //     '</B> . </p>'
+          // );
+
+        }
+        console.log(`Trigger mail`);
+        await MailService.mailTrigger(
+          'panchalravina11@gmail.com',
+          'Forgot Password ',
+          '<h3 style="color: #2b2301;"> Hi' +
+            emailData.userName +
+            '</h3>' +
+            '<p>Please use this verification code to change your current password : <strong class="demoClass">' +
+            code +
+            '</strong> <br /></p>'
+        );
+        console.log(`Trigger mail success`);
+      }
+    } catch (error: any) {
+      throw new BadRequestError(error.message);
+    }
+  }
+
+  static async forgotPasswordVerification(req: Request) {
+    const { code, password } = req.body;
+    const otpCheck = await OtpCode.findOne({ code: code });
+    if (!otpCheck) {
+      throw new BadRequestError('Invalid Otp');
+    }
+    var dateNow = new Date();
+    console.log(
+      `Verify Otp Expiry Date  :: ${otpCheck.expirationTime.toUTCString()}`
+    );
+    console.log(`Verify Otp Current Date :: ${dateNow.toUTCString()}`);
+
+    if (otpCheck.expirationTime < dateNow) {
+      throw new BadRequestError('Opt Expired!');
+    }
+    const hashed = await Password.toHash(password);
+    const newData = await Admin.findOneAndUpdate(
+      { email: otpCheck.email },
+      { password: hashed }
+    );
+
+    if (newData) {
+      console.log('password updated');
+      const accessToken = await JwtService.accessToken(
+        newData.id,
+        newData.email,
+        PayloadType.AdminType
+      );
+      const newRefreshToken = await AdminDatase.updateRefreshToken(
+        newData.id,
+        newData.email
+      );
+      //delete otp entry for the forgot password
+      await OtpCode.findByIdAndDelete(otpCheck.id);
+      req.session = { jwt: accessToken, refreshToken: newRefreshToken };
+      return { accessToken: accessToken, refreshToken: newRefreshToken };
+    } else {
+      throw new BadRequestError('Something went wrong');
     }
   }
 }

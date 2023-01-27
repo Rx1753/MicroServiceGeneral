@@ -70,6 +70,7 @@ export const verifyAdminToken = async (
     });
 
     if (!data) {
+      console.log('payload id', payload.id);
       throw new BadRequestError(
         'token/session you login is no more authorized'
       );

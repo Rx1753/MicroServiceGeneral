@@ -41,5 +41,10 @@ router.put('/api/users/admin/statusUpdate/:id',verifyAdminToken,AdminDomain.stat
 // Search
 router.get('/api/users/admin/getAdminByName',verifyAdminToken,AdminDomain.getAdminByName);
 
+//forgot password
+router.post('/api/users/admin/forgotPassword/sendOtp', Validation.forgotPasswordValidation, verifyAdminToken,validateRequest, AdminDomain.forgotPassword);
+
+router.post('/api/users/admin/forgotPassword/verifyOtp', Validation.forgotPasswordVerificationValidation,verifyAdminToken, validateRequest, AdminDomain.forgotPasswordVerification);
+
 
 export { router as adminAuthRouter };

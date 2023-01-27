@@ -73,4 +73,16 @@ export class Validation {
     query('pageNo').isInt().withMessage('pageNo is required as type int'),
     query('limit').isInt().withMessage('limit is required as type int'),
   ];
+
+  static forgotPasswordValidation = [
+    body('email').isEmail().withMessage('email must be valid'),
+  ];
+
+  static forgotPasswordVerificationValidation = [
+    body('code').notEmpty().withMessage('code is required'),
+    body('password')
+      .trim()
+      .isLength({ min: 8, max: 20 })
+      .withMessage('password must be between 4 and 20 characters'),
+  ];
 }

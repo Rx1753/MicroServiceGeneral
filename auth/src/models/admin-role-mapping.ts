@@ -26,8 +26,6 @@ const AdminRoleMappingSchema = new mongoose.Schema(
   {
     roleId: { type: String, ref: 'AdminRole' },
     permissionId: { type: String, ref: 'AdminPermissions' },
-    createdAt: { type: Number, default: () => Date.now() },
-    updatedAt: { type: Number, default: () => Date.now() },
   },
   {
     toJSON: {
@@ -36,16 +34,9 @@ const AdminRoleMappingSchema = new mongoose.Schema(
         delete ret.__v;
       },
     },
+    timestamps: true,
   }
 );
-
-// This is middleware function
-AdminRoleMappingSchema.pre('update', async function (done) {
-  const currentDate = new Date();
-  const updated_at = currentDate.getTime();
-  this.set('updatedAt', updated_at);
-  done();
-});
 
 // Adding statics property in schema
 AdminRoleMappingSchema.statics.build = (attrs: AdminRoleMappingAttrs) => {

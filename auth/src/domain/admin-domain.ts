@@ -45,7 +45,7 @@ export class AdminDomain {
       req.body.phoneNumber == null &&
       req.body.phoneNumber == undefined
     ) {
-      console.log('sign up with email');
+      console.log('login with email');
       email = req.body.email;
       exitstingEmail = await AdminDatase.isExistingEmail(email);
       isEmail = true;
@@ -56,7 +56,7 @@ export class AdminDomain {
       req.body.email == null &&
       req.body.email == undefined
     ) {
-      console.log('sign up with phone');
+      console.log('login with phone');
       phoneNumber = req.body.phoneNumber;
       existingPhone = await AdminDatase.isExistingPhone(phoneNumber);
     }
@@ -80,18 +80,16 @@ export class AdminDomain {
     }
 
     if (exitstingEmail) {
-      const accessToken = await JwtService.accessToken({
-        email: exitstingEmail.email,
-        id: exitstingEmail.id,
-        phoneNumber: exitstingEmail.phoneNumber,
-        type: PayloadType.AdminType,
-      });
-      const newRefreshToken = await AdminDatase.updateRefreshToken(
+      const accessToken = await JwtService.accessToken(
         exitstingEmail.id,
         exitstingEmail.email,
-        exitstingEmail.phoneNumber
+        PayloadType.AdminType
       );
-      req.session = { jwt: accessToken };
+      const newRefreshToken = await AdminDatase.updateRefreshToken(
+        exitstingEmail.id,
+        exitstingEmail.email
+      );
+      req.session = { jwt: accessToken, refreshToken: newRefreshToken };
       //console.log('session', req.session);
       return res.status(201).send({
         success: true,
@@ -99,16 +97,14 @@ export class AdminDomain {
         refreshToken: newRefreshToken,
       });
     } else if (existingPhone) {
-      const accessToken = await JwtService.accessToken({
-        email: existingPhone.email,
-        id: existingPhone.id,
-        phoneNumber: existingPhone.phoneNumber,
-        type: PayloadType.AdminType,
-      });
-      const newRefreshToken = await AdminDatase.updateRefreshToken(
+      const accessToken = await JwtService.accessToken(
         existingPhone.id,
         existingPhone.email,
-        existingPhone.phoneNumber
+        PayloadType.AdminType
+      );
+      const newRefreshToken = await AdminDatase.updateRefreshToken(
+        existingPhone.id,
+        existingPhone.email
       );
       req.session = { jwt: accessToken, refreshToken: newRefreshToken };
       //console.log('session', req.session);
@@ -216,5 +212,15 @@ export class AdminDomain {
       success: true,
       data: data,
     });
+  }
+
+  static async forgotPassword(req: Request, res: Response) {
+    await AdminDatase.forgotPasswordMailTrigger(req);
+    res.status(200).send({ message: 'Email send successfully' });
+  }
+
+  static async forgotPasswordVerification(req: Request, res: Response) {
+    const data = await AdminDatase.forgotPasswordVerification(req);
+    res.status(200).send(data);
   }
 }

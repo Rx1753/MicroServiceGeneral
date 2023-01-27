@@ -40,12 +40,12 @@ const AdminRoleSchema = new mongoose.Schema(
 );
 
 // This is middleware function
-AdminRoleSchema.pre('update', async function (done) {
-  const currentDate = new Date();
-  const updatedAt = currentDate.getTime();
-  this.set('updatedAt', updatedAt);
-  done();
-});
+// AdminRoleSchema.pre('update', async function (done) {
+//   const currentDate = new Date();
+//   const updatedAt = currentDate.getTime();
+//   this.set('updatedAt', updatedAt);
+//   done();
+// });
 
 // Adding statics property in schema
 AdminRoleSchema.statics.build = (attrs: AdminRoleAttrs) => {
