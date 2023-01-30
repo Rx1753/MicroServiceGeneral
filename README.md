@@ -23,6 +23,8 @@ To create general service for Auth
 
 3) Install Docker in system
 
+4) Install ingress in local system ([link](https://kubernetes.github.io/ingress-nginx/deploy/)
+
 ## Services
 
  Create Auth service with src folder & Docker file
@@ -63,10 +65,13 @@ To delete services & depl:
 * `kubectl get services`  //get all services from kubernets
 * `kubectl describe service posts-srv` //Describe services
 * `kubectl rollout restart deployment posts-depl` //To restart deployment
+* `kubectl delete all  --all -n ingress-nginx` //To delete ingress-nginx
 
 // nats local
 * `kubectl get pods`
 * `kubectl port-forward nats podname 4222:4222`
 
 * `docker ps` //to see list 
-* `docker exec -it` 
+* `docker exec -it`
+* `docker images` //Docker image list 
+* `docker rmi -f imageId` //Remove forcefully image from docker

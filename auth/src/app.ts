@@ -3,6 +3,7 @@ import 'express-async-errors';
 import bodyParser from 'body-parser';
 import cookieSession from 'cookie-session';
 import { errorHandler, NotFoundError } from '@rx-projects/common';
+import { adminAuthRouter } from './routes/admin-router';
 
 const app = express();
 
@@ -16,6 +17,9 @@ app.use(
     secure: true, // use cookie only on https connection
   })
 );
+
+//Router
+app.use(adminAuthRouter);
 
 app.all('*', async () => {
   throw new NotFoundError();

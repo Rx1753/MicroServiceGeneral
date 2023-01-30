@@ -1,0 +1,30 @@
+[
+  {
+    "_id": {
+      "$oid": "63996aa5748918a4a9d65d6c"
+    },
+    "userName": "Super Admin",
+    "email": "superadmin@gmail.com",
+    "password": "0c6023567580cd534dd92eb946925e48fc69d9decdfdbc1ad8a0f718cde3ce5418f590a7657c9f01214920bca8a789cfbb9a92c9999280cff4bbf02de7c630b0.d6dd20b7148abfe4",
+    "phone": {
+      "$numberLong": "9484607452"
+    },
+    "isMfa": false,
+    "isEmailVerified": false,
+    "isMobileVerified": false,
+    "imageUrl": "",
+    "isSuperAdmin": true,
+    "createdBy": null,
+    "updatedBy": "",
+    "isActive": true,
+    "roleId": "",
+    "createdAt": {
+      "$numberLong": "1670998693168"
+    },
+    "updatedAt": {
+      "$numberLong": "1670998693168"
+    },
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlkIjoiNjM5OTZhYTU3NDg5MThhNGE5ZDY1ZDZjIiwicGhvbmVOdW1iZXIiOjk0ODQ2MDc0NTIsInR5cGUiOiJBZG1pbiIsImlhdCI6MTY3MDk5ODY5MywiZXhwIjoxNjcxODYyNjkzfQ.fkbHUlkqKIWZbDcJmljTUEW08EyBHyACQN0PaeAvl2g",
+    "__v": 0
+  }
+]
