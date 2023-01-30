@@ -1,4 +1,4 @@
-import { AdminDatase } from '../database-layer/admin-data-layer';
+import { AdminDatabase } from '../database-layer/admin-data-layer';
 import { Request, Response } from 'express-serve-static-core';
 import { BadRequestError } from '@rx-projects/common';
 import { AdminPermissionsAttrs } from '../models/admin-permissions';
@@ -8,11 +8,11 @@ import { PayloadType } from '../services/string-values';
 export class AdminDomain {
   static async addPermissions(req: Request, res: Response) {
     const data: AdminPermissionsAttrs = req.body;
-    var isPermissionExistWithTN = await AdminDatase.checkPermissionExist(data);
+    var isPermissionExistWithTN = await AdminDatabase.checkPermissionExist(data);
     if (isPermissionExistWithTN) {
       throw new BadRequestError('permission already exist for this table');
     }
-    var isPermissionAdded = await AdminDatase.addPermission(data);
+    var isPermissionAdded = await AdminDatabase.addPermission(data);
     if (isPermissionAdded) {
       res.status(201).send(isPermissionAdded);
     } else {
@@ -21,12 +21,12 @@ export class AdminDomain {
   }
 
   static async createRole(req: Request, res: Response) {
-    var data = await AdminDatase.createRole(req);
+    var data = await AdminDatabase.createRole(req);
     res.status(200).send(data);
   }
 
   static async updateRolePermissions(req: Request, res: Response) {
-    var data = await AdminDatase.updateRolePermissions(req);
+    var data = await AdminDatabase.updateRolePermissions(req);
     res.status(200).send(data);
   }
 
@@ -47,7 +47,7 @@ export class AdminDomain {
     ) {
       console.log('login with email');
       email = req.body.email;
-      exitstingEmail = await AdminDatase.isExistingEmail(email);
+      exitstingEmail = await AdminDatabase.isExistingEmail(email);
       isEmail = true;
     }
     if (
@@ -58,7 +58,7 @@ export class AdminDomain {
     ) {
       console.log('login with phone');
       phoneNumber = req.body.phoneNumber;
-      existingPhone = await AdminDatase.isExistingPhone(phoneNumber);
+      existingPhone = await AdminDatabase.isExistingPhone(phoneNumber);
     }
 
     if (isEmail && !exitstingEmail) {
@@ -69,7 +69,7 @@ export class AdminDomain {
       throw new BadRequestError('Invalid PhoneNumber');
     }
 
-    const passwordMatch = await AdminDatase.checkPassword(
+    const passwordMatch = await AdminDatabase.checkPassword(
       isEmail ? exitstingEmail.password : existingPhone.password,
       password
     );
@@ -85,7 +85,7 @@ export class AdminDomain {
         exitstingEmail.email,
         PayloadType.AdminType
       );
-      const newRefreshToken = await AdminDatase.updateRefreshToken(
+      const newRefreshToken = await AdminDatabase.updateRefreshToken(
         exitstingEmail.id,
         exitstingEmail.email
       );
@@ -102,7 +102,7 @@ export class AdminDomain {
         existingPhone.email,
         PayloadType.AdminType
       );
-      const newRefreshToken = await AdminDatase.updateRefreshToken(
+      const newRefreshToken = await AdminDatabase.updateRefreshToken(
         existingPhone.id,
         existingPhone.email
       );
@@ -122,11 +122,11 @@ export class AdminDomain {
     var existingUser: any;
 
     if (email != undefined || email != null) {
-      existingUser = await AdminDatase.isExistingEmail(email);
+      existingUser = await AdminDatabase.isExistingEmail(email);
     }
 
     if (phoneNumber != undefined || phoneNumber != null) {
-      exitstingPhone = await AdminDatase.isExistingPhone(phoneNumber);
+      exitstingPhone = await AdminDatabase.isExistingPhone(phoneNumber);
     }
 
     if (existingUser) {
@@ -137,7 +137,7 @@ export class AdminDomain {
       throw new BadRequestError('Phone is Already in use');
     }
 
-    var user = await AdminDatase.addAdminUser(req);
+    var user = await AdminDatabase.addAdminUser(req);
     return res.status(201).send(user);
   }
 
@@ -147,11 +147,11 @@ export class AdminDomain {
     var existingUser: any;
 
     if (email != undefined || email != null) {
-      existingUser = await AdminDatase.isExistingEmail(email);
+      existingUser = await AdminDatabase.isExistingEmail(email);
     }
 
     if (phoneNumber != undefined || phoneNumber != null) {
-      exitstingPhone = await AdminDatase.isExistingPhone(phoneNumber);
+      exitstingPhone = await AdminDatabase.isExistingPhone(phoneNumber);
     }
 
     if (existingUser) {
@@ -162,12 +162,12 @@ export class AdminDomain {
       throw new BadRequestError('Phone is Already in use');
     }
 
-    var user = await AdminDatase.addNewUser(req);
+    var user = await AdminDatabase.addNewUser(req);
     return res.status(201).send(user);
   }
 
   static async getUserById(req: Request, res: Response) {
-    var user = await AdminDatase.getUserById(req);
+    var user = await AdminDatabase.getUserById(req);
     if (!user) {
       throw new BadRequestError('User does not exist');
     }
@@ -175,7 +175,7 @@ export class AdminDomain {
   }
 
   static async getAdminRoles(req: Request, res: Response) {
-    var user = await AdminDatase.getAdminRoles(req);
+    var user = await AdminDatabase.getAdminRoles(req);
     if (!user) {
       throw new BadRequestError('User does not exist');
     }
@@ -183,31 +183,31 @@ export class AdminDomain {
   }
 
   static async getAdminRolesList(req: Request, res: Response) {
-    var list = await AdminDatase.getAdminRolesList(req);
+    var list = await AdminDatabase.getAdminRolesList(req);
     res.status(200).send(list);
   }
 
   static async updateAdminRole(req: Request, res: Response) {
-    const data = await AdminDatase.updateAdminRole(req);
+    const data = await AdminDatabase.updateAdminRole(req);
     res.status(200).send(data);
   }
 
   static async getAdminList(req: Request, res: Response) {
-    const data = await AdminDatase.getAdminList(req);
+    const data = await AdminDatabase.getAdminList(req);
     res.status(200).send(data);
   }
   static async getAdminByStatus(req: Request, res: Response) {
-    const data = await AdminDatase.getAdminByStatus(req);
+    const data = await AdminDatabase.getAdminByStatus(req);
     res.status(200).send(data);
   }
 
   static async statusUpdateForAdmin(req: Request, res: Response) {
-    var data = await AdminDatase.statusUpdateForAdmin(req);
+    var data = await AdminDatabase.statusUpdateForAdmin(req);
     res.status(200).send(data);
   }
 
   static async getAdminByName(req: Request, res: Response) {
-    var data = await AdminDatase.getAdminByName(req);
+    var data = await AdminDatabase.getAdminByName(req);
     res.status(200).send({
       success: true,
       data: data,
@@ -215,12 +215,15 @@ export class AdminDomain {
   }
 
   static async forgotPassword(req: Request, res: Response) {
-    await AdminDatase.forgotPasswordMailTrigger(req);
-    res.status(200).send({ message: 'Email send successfully' });
+    var isEmailTriggered = await AdminDatabase.forgotPasswordMailTrigger(req);
+    if(isEmailTriggered){
+      res.status(200).send({ message: 'Email send successfully' });
+    }
+   
   }
 
   static async forgotPasswordVerification(req: Request, res: Response) {
-    const data = await AdminDatase.forgotPasswordVerification(req);
+    const data = await AdminDatabase.forgotPasswordVerification(req);
     res.status(200).send(data);
   }
 }

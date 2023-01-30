@@ -14,11 +14,11 @@ import { PayloadType } from '../services/string-values';
 import { OtpCode } from '../models/otp-code';
 import { OtpGenerator } from '../services/otp';
 import { Common } from '../services/common';
-import { MailService } from '../services/mail_service';
-import { clouddebugger } from 'googleapis/build/src/apis/clouddebugger';
-import { gmail } from 'googleapis/build/src/apis/gmail';
+import { MailService } from '../services/mail-service';
+import { HtmlTemplate } from '../services/html-templates';
+import { SendSmsService } from '../services/send-sms-service';
 
-export class AdminDatase {
+export class AdminDatabase {
   static async checkPermissionExist(data: AdminPermissionsAttrs) {
     const isPermissionExistWithTN: any = await AdminPermissions.findOne({
       tableName: data.tableName,
@@ -271,17 +271,20 @@ export class AdminDatase {
     //Triggers for Email/Phone Sign up
     if (user.email != null) {
       //TODO email trigger
+      var htmlTemplate = HtmlTemplate.sendEmailWithCredentials(
+        userName,
+        email,
+        password
+      );
       await MailService.mailTrigger(
         user.email,
         'Admin Credentials',
-        '<h1>Hello,</h1><p>here, is your admin credentials,</br> pls enter it when you login to application as admin <B> Email:' +
-          user.email +
-          '</br>Password:' +
-          user.password +
-          '</B> . </p>'
+        htmlTemplate
       );
     } else {
       //TODO sms trigger
+      var content = `Hello, ${userName}, Credentials to login Domain name \n PhoneNumber : ${phoneNumber}, \n Password: ${password}`;
+      await SendSmsService.sendSms(content, user.phoneNumber!.toString());
     }
     return adminData;
   }
@@ -582,6 +585,13 @@ export class AdminDatase {
           email: email,
         });
 
+        //Send email than save it to db
+        var htmlTemplate = HtmlTemplate.sendOtpOnForgotPassword(
+          emailData.userName,
+          code
+        );
+        await MailService.mailTrigger(email, 'Forgot Password ', htmlTemplate);
+
         //Create OTP instance in DB
         if (isOtpExists) {
           await OtpCode.findByIdAndUpdate(isOtpExists.id, {
@@ -598,33 +608,13 @@ export class AdminDatase {
             expirationTime: expirationTime,
           });
           await createVerificationCode.save();
-
-          //Trigger mail
-          // await MailService.mailTrigger(
-          //   req.body.email,
-          //   'Forgot Password ',
-          //   '<h1>Hi' +
-          //     emailData.userName +
-          //     '</h1><p>Please use this verification code to change your current password,</br> ' +
-          //     code +
-          //     '</B> . </p>'
-          // );
-
         }
-        console.log(`Trigger mail`);
-        await MailService.mailTrigger(
-          'panchalravina11@gmail.com',
-          'Forgot Password ',
-          '<h3 style="color: #2b2301;"> Hi' +
-            emailData.userName +
-            '</h3>' +
-            '<p>Please use this verification code to change your current password : <strong class="demoClass">' +
-            code +
-            '</strong> <br /></p>'
-        );
-        console.log(`Trigger mail success`);
+
+        console.log(`Email trigged and save it to db :: ${code}`);
+        return true;
       }
     } catch (error: any) {
+      return false;
       throw new BadRequestError(error.message);
     }
   }
@@ -657,7 +647,7 @@ export class AdminDatase {
         newData.email,
         PayloadType.AdminType
       );
-      const newRefreshToken = await AdminDatase.updateRefreshToken(
+      const newRefreshToken = await AdminDatabase.updateRefreshToken(
         newData.id,
         newData.email
       );
