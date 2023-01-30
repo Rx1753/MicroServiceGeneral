@@ -6,19 +6,19 @@ const client = require('twilio')(accountSid, authToken);
 
 export class SendSmsService {
   static async sendSms(smsContent: string, sendTo: string) {
-    try {
-      console.log(`Sms Start`);
-      var response = await client.messages.create({
-        body: smsContent,
-        from: '+16203123125',
-        to: '+919974146404',
-      });
+    // try {
+    //   console.log(`Sms Start`);
+    //   var response = await client.messages.create({
+    //     body: smsContent,
+    //     from: '+16203123125',
+    //     to: '+919974146404',
+    //   });
 
-      console.log(
-        `Sms sent successfully :: ${response.sid} ---> ${response.to}`
-      );
-    } catch (error: any) {
-      console.log(`Sms Error :: ${error}`);
-    }
+    //   console.log(
+    //     `Sms sent successfully :: ${response.sid} ---> ${response.to}`
+    //   );
+    // } catch (error: any) {
+    //   console.log(`Sms Error :: ${error}`);
+    // }
   }
 }

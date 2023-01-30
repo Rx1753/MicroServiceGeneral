@@ -64,16 +64,16 @@ export class MailService {
 
     //Uncomment to send email
     
-    var transporter = nodemailer.createTransport(smtpConfig);
+    // var transporter = nodemailer.createTransport(smtpConfig);
 
-    return transporter.sendMail(mailOptions, function (error: any, info: any) {
-      if (error) {
-        console.log(`sendMail :: ${error}`);
-        throw new BadRequestError(error.message);
-      } else {
-        console.log('Email sent: ' + info.response);
-        return true;
-      }
-    });
+    // return transporter.sendMail(mailOptions, function (error: any, info: any) {
+    //   if (error) {
+    //     console.log(`sendMail :: ${error}`);
+    //     throw new BadRequestError(error.message);
+    //   } else {
+    //     console.log('Email sent: ' + info.response);
+    //     return true;
+    //   }
+    // });
   }
 }
