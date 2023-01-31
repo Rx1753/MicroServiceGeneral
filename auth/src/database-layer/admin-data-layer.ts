@@ -331,19 +331,22 @@ export class AdminDatabase {
     }
     var data = await Admin.findOne({ _id: req.params.id });
     if (data) {
+      var role = await AdminRole.findById({ _id: data.roleId });
+      const resData = JSON.parse(JSON.stringify(data));
       const roleData = await AdminRoleMapping.find({
         roleId: data.roleId,
       }).populate('permissionId');
       if (roleData) {
-        const resData = JSON.parse(JSON.stringify(data));
+        resData.roleName = role?.name;
         resData.permission = roleData;
+        return resData;
+      } else {
+        resData.roleName = role?.name;
         return resData;
       }
     } else {
       throw new BadRequestError("id doesn't exist");
     }
-
-    return data;
   }
 
   static async getAdminRoles(req: Request) {
@@ -354,7 +357,6 @@ export class AdminDatabase {
       var role = await AdminRole.findById({ _id: req.params.id });
 
       var permissionsList: {}[] = [];
-
       await Promise.all(
         roleData.map(async (e: any) => {
           permissionsList.push(e.permissionId);
@@ -527,7 +529,7 @@ export class AdminDatabase {
 
     if (adminData) {
       const data = await Admin.findById({ _id: req.params.id });
-      if (data) {
+      if (data && !data?.isSuperAdmin) {
         var status = data.isActive ? false : true;
         await Admin.findByIdAndUpdate(req.params.id, { isActive: status });
         return {

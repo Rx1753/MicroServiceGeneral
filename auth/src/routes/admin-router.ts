@@ -20,35 +20,35 @@ router.post(
 
 //Create role with permissions
 router.post(
-  '/api/users/admin/createRole',
-  Validation.createRoleValidation,
+  '/api/users/admin/create/role',
   verifyAdminToken,
+  Validation.createRoleValidation,
   validateRequest,
   AdminDomain.createRole
 );
 
 //Update the role with permissions
 router.put(
-  '/api/users/admin/updateRolePermissions',
-  Validation.updateRolePermissionValidation,
+  '/api/users/admin/update/rolepermissions',
   verifyAdminToken,
+  Validation.updateRolePermissionValidation,
   validateRequest,
   AdminDomain.updateRolePermissions
 );
 
 //Add admin user by super admin
 router.post(
-  '/api/users/admin/addAdmin',
-  Validation.addAdminValidation,
+  '/api/users/admin/addadmin',
   verifyAdminToken,
+  Validation.addAdminValidation,
   validateRequest,
   AdminDomain.addAdmin
 );
 //Add user with new role by admin/superadmin
 router.post(
-  '/api/users/admin/addUser',
-  Validation.addAdminValidation,
+  '/api/users/admin/adduser',
   verifyAdminToken,
+  Validation.addAdminValidation,
   validateRequest,
   AdminDomain.addNewUser
 );
@@ -63,76 +63,77 @@ router.post(
 
 //Update Admin Role
 router.put(
-  '/api/users/admin/updateAdminRole',
-  Validation.updateAdminRoleValidation,
+  '/api/users/admin/update/adminrole',
   verifyAdminToken,
+  Validation.updateAdminRoleValidation,
   validateRequest,
   AdminDomain.updateAdminRole
 );
 
 //Single User Detail
 router.get(
-  '/api/users/admin/getAdminDetails/:id',
+  '/api/users/admin/getadmins/:id',
   verifyAdminToken,
   AdminDomain.getUserById
 );
 router.get(
-  '/api/users/admin/getAdminRoles/:id',
+  '/api/users/admin/getadminroles/:id',
   verifyAdminToken,
   AdminDomain.getAdminRoles
 );
 
+// All list
 router.get(
-  '/api/users/admin/getList',
+  '/api/users/admin/getadmins',
   verifyAdminToken,
   validateRequest,
   AdminDomain.getAdminList
 );
 router.get(
-  '/api/users/admin/getListByStatus',
-  Validation.getListByStatusValidation,
+  '/api/users/admin/getlistbystatus',
   verifyAdminToken,
+  Validation.getListByStatusValidation,
   validateRequest,
   AdminDomain.getAdminByStatus
 );
 router.get(
-  '/api/users/admin/getAdminRolesList',
+  '/api/users/admin/getadminroles',
   verifyAdminToken,
   AdminDomain.getAdminRolesList
 );
 
 // Active/InActive status
 router.put(
-  '/api/users/admin/statusUpdate/:id',
+  '/api/users/admin/updatestatus/:id',
   verifyAdminToken,
   AdminDomain.statusUpdateForAdmin
 );
 
 // Search
 router.get(
-  '/api/users/admin/getAdminByName',
+  '/api/users/admin/getadminbyname',
   verifyAdminToken,
   AdminDomain.getAdminByName
 );
 
 //forgot password
 router.post(
-  '/api/users/admin/forgotPassword/sendOtp',
-  Validation.forgotPasswordValidation,
+  '/api/users/admin/forgotpassword/sendotp',
   verifyAdminToken,
+  Validation.forgotPasswordValidation,
   validateRequest,
   AdminDomain.forgotPassword
 );
 
 router.post(
-  '/api/users/admin/forgotPassword/verifyOtp',
-  Validation.forgotPasswordVerificationValidation,
+  '/api/users/admin/forgotpassword/verifyotp',
   verifyAdminToken,
+  Validation.forgotPasswordVerificationValidation,
   validateRequest,
   AdminDomain.forgotPasswordVerification
 );
 
-router.post('/api/users/admin/sendEmail', async (req: any, res: any) => {
+router.post('/api/users/admin/sendemail', async (req: any, res: any) => {
   var email = 'admin@gmail.com';
   var password = '12345678';
   var html = HtmlTemplate.sendEmailWithCredentials('Test', email, password);
@@ -146,7 +147,7 @@ router.post('/api/users/admin/sendEmail', async (req: any, res: any) => {
   });
 });
 
-router.post('/api/users/admin/sendSms', async (req: any, res: any) => {
+router.post('/api/users/admin/sendsms', async (req: any, res: any) => {
   await SendSmsService.sendSms(
     'This is the first content sms',
     '+919974146404'
