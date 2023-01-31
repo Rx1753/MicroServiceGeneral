@@ -33,17 +33,17 @@ router.delete(
   StateDomain.deleteState
 );
 
-// get all Country
-router.get('/api/users/state/getList', StateDomain.getStateList);
+// get all States
+router.get('/api/users/state/getstates', StateDomain.getStateList);
 router.get(
-  '/api/users/state/getListByStatus',
+  '/api/users/state/getlistbystatus',
   StateValidation.getListByStatusValidation,
   validateRequest,
   StateDomain.getListBystatus
 );
 
 router.get(
-  '/api/users/state/getStateByName',
+  '/api/users/state/getlistbyname',
   StateValidation.getStateByNameValidation,
   validateRequest,
   StateDomain.getStateByName

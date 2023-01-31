@@ -7,6 +7,7 @@ import { adminAuthRouter } from './routes/admin-router';
 import { customerAuthRouter } from './routes/customer-router';
 import { countryRouter } from './routes/country-router';
 import { stateRouter } from './routes/state-router';
+import { cityRouter } from './routes/city-router';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(adminAuthRouter);
 app.use(customerAuthRouter);
 app.use(countryRouter);
 app.use(stateRouter);
+app.use(cityRouter);
 
 app.all('*', async () => {
   throw new NotFoundError();

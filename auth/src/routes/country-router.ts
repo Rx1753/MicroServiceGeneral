@@ -34,16 +34,16 @@ router.delete(
 );
 
 // get all Country
-router.get('/api/users/country/getList', CountryDomain.getCountryList);
+router.get('/api/users/country/getcountries', CountryDomain.getCountryList);
 router.get(
-  '/api/users/country/getListBystatus',
+  '/api/users/country/getlistbystatus',
   CountryValidation.getListByStatusValidation,
   validateRequest,
   CountryDomain.getCountryByStatus
 );
 
 router.get(
-  '/api/users/country/getCountryByName',
+  '/api/users/country/getlistbyname',
   CountryValidation.getCountryByNameValidation,
   validateRequest,
   CountryDomain.getCountryByName

@@ -52,7 +52,28 @@ export class Validation {
 
   static updateRolePermissionValidation = [
     body('roleId').notEmpty().withMessage('Please provide roleId'),
-    body('permissionId').notEmpty().withMessage('permissionId is required'),
+    //body('permissionId').notEmpty().withMessage('permissionId is required'),
+    body('permissionId')
+      .isArray()
+      .notEmpty()
+      .withMessage('permissionId is required as an array')
+      .custom(async (permissions) => {
+        if (permissions !== undefined) {
+          const isPermissionIdRepeatArr: string[] = [];
+          await Promise.all(
+            permissions.map(async (e: any) => {
+              if (isPermissionIdRepeatArr.includes(e)) {
+                throw new BadRequestError(`permissionId $${e} is repeated`);
+              } else {
+                isPermissionIdRepeatArr.push(e);
+              }
+            })
+          );
+          return true;
+        } else {
+          return false;
+        }
+      }),
   ];
 
   static updateAdminRoleValidation = [
