@@ -4,6 +4,9 @@ import bodyParser from 'body-parser';
 import cookieSession from 'cookie-session';
 import { errorHandler, NotFoundError } from '@rx-projects/common';
 import { adminAuthRouter } from './routes/admin-router';
+import { customerAuthRouter } from './routes/customer-router';
+import { countryRouter } from './routes/country-router';
+import { stateRouter } from './routes/state-router';
 
 const app = express();
 
@@ -20,6 +23,9 @@ app.use(
 
 //Router
 app.use(adminAuthRouter);
+app.use(customerAuthRouter);
+app.use(countryRouter);
+app.use(stateRouter);
 
 app.all('*', async () => {
   throw new NotFoundError();
