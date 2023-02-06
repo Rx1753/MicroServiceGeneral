@@ -12,7 +12,7 @@ import mongoose from 'mongoose';
 import { JwtService } from '../services/jwt';
 import { PayloadType } from '../services/string-values';
 import { OtpCode } from '../models/otp-code';
-import { OtpGenerator } from '../services/otp';
+import { CodeGenerator } from '../services/otp';
 import { Common } from '../services/common';
 import { MailService } from '../services/mail-service';
 import { HtmlTemplate } from '../services/html-templates';
@@ -115,9 +115,13 @@ export class AdminDatabase {
     return existingEmail;
   }
 
-  static async isExistingPhone(phoneNumber: Number) {
+  static async isExistingPhone(phoneNumber: Number, countryCode: Number) {
     const existingPhone: any = await Admin.findOne({
-      $and: [{ phoneNumber: phoneNumber }, { isActive: true }],
+      $and: [
+        { phoneNumber: phoneNumber },
+        { countryCode: countryCode },
+        { isActive: true },
+      ],
     });
     return existingPhone;
   }
@@ -183,6 +187,8 @@ export class AdminDatabase {
       phoneNumber,
       isAllowChangePassword,
       roleId,
+      countryCode,
+      rolesArray,
     } = req.body;
     const roleCheck = await AdminRole.findById(roleId);
     if (!roleCheck) {
@@ -197,44 +203,43 @@ export class AdminDatabase {
       password: hashPassword,
       allowChangePassword: isAllowChangePassword,
       roleId: roleId,
+      countryCode: countryCode,
     };
     if (
-      req.body.phoneNumber == null &&
-      req.body.phoneNumber == undefined &&
-      req.body.email != null &&
-      req.body.email != undefined
+      phoneNumber == null &&
+      phoneNumber == undefined &&
+      email != null &&
+      email != undefined
     ) {
-      console.log('sign up with email');
       user.email = email;
       user.phoneNumber = null;
-    }
-
-    if (
-      req.body.phoneNumber != null &&
-      req.body.phoneNumber != undefined &&
-      req.body.email == null &&
-      req.body.email == undefined
+      user.countryCode = null;
+      console.log('sign up with email');
+    } else if (
+      phoneNumber != null &&
+      phoneNumber != undefined &&
+      email == null &&
+      email == undefined
     ) {
-      console.log('sign up with phone no');
       user.phoneNumber = phoneNumber;
+      user.countryCode = countryCode;
       user.email = null;
-    }
-
-    if (
-      req.body.phoneNumber != null &&
-      req.body.phoneNumber != undefined &&
-      req.body.email != null &&
-      req.body.email != undefined
+      console.log('sign up with phone no');
+    } else if (
+      phoneNumber != null &&
+      phoneNumber != undefined &&
+      email != null &&
+      email != undefined
     ) {
       user.phoneNumber = phoneNumber;
+      user.countryCode = countryCode;
       user.email = email;
     }
 
     //Role permission logic
-    const roleData = req.body.rolesArray;
     const roleDataArr: string[] = [];
 
-    roleData.forEach((e: any) => {
+    rolesArray.forEach((e: any) => {
       if (!roleDataArr.includes(e.tableName)) {
         roleDataArr.push(e.tableName);
       } else {
@@ -245,7 +250,7 @@ export class AdminDatabase {
     var permissionRoleId: { _id: string }[] = [];
 
     await Promise.all(
-      roleData.map(async (e: any) => {
+      rolesArray.map(async (e: any) => {
         const permissionRoleMap = await this.checkRoleMapping(
           e.tableName,
           e.isCreate,
@@ -431,11 +436,34 @@ export class AdminDatabase {
     return adminData;
   }
 
+  // create new token in admin user
+  static async createAccessToken(
+    id: string,
+    email: string,
+    phoneNumber: string,
+    countryCode: string
+  ) {
+    const accessToken = await JwtService.accessToken(
+      id,
+      email,
+      phoneNumber,
+      countryCode,
+      PayloadType.AdminType
+    );
+    return accessToken;
+  }
   // update refresh token in admin user
-  static async updateRefreshToken(id: string, email: string) {
+  static async updateRefreshToken(
+    id: string,
+    email: string,
+    phoneNumber: string,
+    countryCode: string
+  ) {
     const refreshToken = await JwtService.refreshToken(
       id,
       email,
+      phoneNumber,
+      countryCode,
       PayloadType.AdminType
     );
     const admin = await Admin.findByIdAndUpdate(id, {
@@ -579,7 +607,7 @@ export class AdminDatabase {
       }
       if (emailData.allowChangePassword) {
         //Generate OTP
-        const code = OtpGenerator.getOtp();
+        const code = CodeGenerator.getOtp();
         const expirationTime = Common.addSecondsToDate(60);
 
         var isOtpExists = await OtpCode.findOne({
@@ -601,6 +629,7 @@ export class AdminDatabase {
             email: email,
             code: code,
             expirationTime: expirationTime,
+            userId: emailData.id,
           });
         } else {
           var createVerificationCode = OtpCode.build({
@@ -608,6 +637,7 @@ export class AdminDatabase {
             email: email,
             code: code,
             expirationTime: expirationTime,
+            userId: emailData.id,
           });
           await createVerificationCode.save();
         }
@@ -616,7 +646,6 @@ export class AdminDatabase {
         return true;
       }
     } catch (error: any) {
-      return false;
       throw new BadRequestError(error.message);
     }
   }
@@ -644,14 +673,17 @@ export class AdminDatabase {
 
     if (newData) {
       console.log('password updated');
-      const accessToken = await JwtService.accessToken(
+      const accessToken = await AdminDatabase.createAccessToken(
         newData.id,
         newData.email,
-        PayloadType.AdminType
+        newData.phoneNumber,
+        newData.countryCode
       );
       const newRefreshToken = await AdminDatabase.updateRefreshToken(
         newData.id,
-        newData.email
+        newData.email,
+        newData.phoneNumber,
+        newData.countryCode
       );
       //delete otp entry for the forgot password
       await OtpCode.findByIdAndDelete(otpCheck.id);

@@ -9,4 +9,14 @@ export class Common {
     console.log(`Send Otp Expiry  date ---> ${updateDate.toUTCString()}`);
     return updateDate;
   }
+
+  static addDaysToDate(days: number) {
+    const date = new Date();
+    const updateDate = new Date();
+    updateDate.setDate(updateDate.getDate() + days)
+
+    console.log(`Send Otp Current date :: ---> ${date.toUTCString()}`);
+    console.log(`Send Otp Expiry  date :: ---> ${updateDate.toUTCString()}`);
+    return updateDate;
+  }
 }
