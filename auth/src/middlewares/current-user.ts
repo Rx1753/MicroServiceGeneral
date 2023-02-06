@@ -3,11 +3,11 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Admin } from '../models/admin';
 import { PayloadType } from '../services/string-values';
-import { AdminRole } from '../models/admin-role';
 
 interface UserPayload {
   id: string;
-  email: string;
+  //email: string;
+  //phoneNumber: string;
   type: string;
 }
 
@@ -77,6 +77,39 @@ export const verifyAdminToken = async (
     }
     req.currentUser = payload;
     console.log('current user id', payload.id);
+  } catch (error: any) {
+    if (error instanceof TokenExpiredError) {
+      throw new BadRequestError(error.message);
+    } else {
+      throw new BadRequestError(error.message);
+    }
+  }
+  next();
+};
+
+export const verifyCustomerToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.session?.jwt && !req.headers['token']) {
+    console.log('token not wrote');
+    throw new BadRequestError('Token/Session not provided');
+  }
+
+  var token;
+  if (req.session?.jwt) {
+    token = req.session?.jwt;
+  } else {
+    token = req.headers['token'];
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_KEY!) as UserPayload;
+    if (payload.type != PayloadType.CustomerType) {
+      throw new BadRequestError('Unauthorized User');
+    }
+    req.currentUser = payload;
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
       throw new BadRequestError(error.message);

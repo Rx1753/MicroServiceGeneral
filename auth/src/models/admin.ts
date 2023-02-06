@@ -7,10 +7,11 @@ export interface AdminAttrs {
   userName: string;
   email?: string | null;
   password: string;
-  phoneNumber?: number | null;
+  phoneNumber?: string | null;
+  countryCode?: string | null;
   createdBy?: string | null;
   allowChangePassword: boolean;
-  roleId: string,
+  roleId: string;
 }
 
 // An interface that describe the properties
@@ -19,7 +20,8 @@ interface AdminDoc extends mongoose.Document {
   userName: string;
   email: string;
   password: string;
-  phoneNumber: number;
+  phoneNumber: string;
+  countryCode: string;
   isMfa: boolean;
   isEmailVerified: boolean;
   isMobileVerified: boolean;
@@ -45,9 +47,10 @@ interface AdminModel extends mongoose.Model<AdminDoc> {
 const AdminSchema = new mongoose.Schema(
   {
     userName: { type: String, required: true },
-    email: { type: String, },
+    email: { type: String },
     password: { type: String, required: true },
-    phoneNumber: { type: Number },
+    phoneNumber: { type: String },
+    countryCode: { type: String },
     isMfa: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
     isMobileVerified: { type: Boolean, default: false },
@@ -60,7 +63,8 @@ const AdminSchema = new mongoose.Schema(
     allowChangePassword: { type: Boolean, default: true },
     roleId: { type: String, ref: 'AdminRole', required: true },
     createdAt: { type: Number, default: () => Date.now() },
-    updatedAt: { type: Number, default: () => Date.now() }  },
+    updatedAt: { type: Number, default: () => Date.now() },
+  },
   {
     toJSON: {
       transform(doc, ret) {
@@ -90,9 +94,6 @@ AdminSchema.statics.build = (attrs: AdminAttrs) => {
 };
 
 // Model
-const Admin = mongoose.model<AdminDoc, AdminModel>(
-  'Admin',
-  AdminSchema
-);
+const Admin = mongoose.model<AdminDoc, AdminModel>('Admin', AdminSchema);
 
 export { Admin };

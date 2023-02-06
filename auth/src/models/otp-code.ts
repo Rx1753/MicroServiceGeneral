@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 // that are required to create OtpCode
 interface otpAttrs {
   type: string;
-  phoneNumber?: Number;
+  phoneNumber?: string;
   email?: string;
   userId?: string;
   code: String;
@@ -17,7 +17,7 @@ interface otpAttrs {
 // that OtpCode document has
 interface otpCodeDoc extends mongoose.Document {
   type: string;
-  phoneNumber: Number;
+  phoneNumber: string;
   email: string;
   userId: string;
   code: String;
@@ -38,10 +38,10 @@ const otpCodeSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ['customer', 'business', 'admin', 'email', 'phoneNumber'],
+      enum: ['customer', 'business', 'admin', 'email', 'phone'],
     },
     userId: { type: String },
-    phoneNumber: { type: Number },
+    phoneNumber: { type: String },
     email: { type: String },
     code: { type: String },
     isUsed: { type: Boolean, defaul: false },

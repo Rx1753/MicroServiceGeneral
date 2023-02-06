@@ -1,13 +1,22 @@
 import jwt from 'jsonwebtoken';
 
 export class JwtService {
-  //email,id,type
-
-  static accessToken = async (id: string, email: string, type: string) => {
+  static accessToken = async (
+    id: string,
+    email: string,
+    phoneNumber: string,
+    countryCode: string,
+    type: string
+  ) => {
+    console.log(
+      `jwt :: id :: ${id} ,  emailId :: ${email}, phoneNo ::${countryCode} ${phoneNumber}  , type :: ${type}`
+    );
     return jwt.sign(
       {
         id: id,
         email: email,
+        phoneNumber: phoneNumber,
+        countryCode: countryCode,
         type: type,
       },
       process.env.JWT_KEY!,
@@ -15,11 +24,22 @@ export class JwtService {
     );
   };
 
-  static refreshToken = async (id: string, email: string, type: string) => {
+  static refreshToken = async (
+    id: string,
+    email: string,
+    phoneNumber: string,
+    countryCode: string,
+    type: string
+  ) => {
+    console.log(
+      `jwt refresh :: id :: ${id} ,  emailId :: ${email}, phoneNo :: ${countryCode} ${phoneNumber} , type :: ${type}`
+    );
     return jwt.sign(
       {
         id: id,
         email: email,
+        phoneNumber: phoneNumber,
+        countryCode: countryCode,
         type: type,
       },
       process.env.JWT_KEY!,
