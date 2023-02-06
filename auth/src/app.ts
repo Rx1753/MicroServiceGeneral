@@ -8,6 +8,7 @@ import { customerRouter } from './routes/customer-router';
 import { countryRouter } from './routes/country-router';
 import { stateRouter } from './routes/state-router';
 import { cityRouter } from './routes/city-router';
+import { customerAddressRouter } from './routes/customer-address';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(customerRouter);
 app.use(countryRouter);
 app.use(stateRouter);
 app.use(cityRouter);
+app.use(customerAddressRouter);
 
 app.all('*', async () => {
   throw new NotFoundError();
