@@ -28,6 +28,8 @@ router.put(
 router.delete(
   '/api/users/city/delete/:id',
   verifyAdminToken,
+  CityValidation.cityDeleteValidation,
+  validateRequest,
   CityDomain.deleteCity
 );
 

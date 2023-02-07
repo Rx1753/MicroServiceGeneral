@@ -4,10 +4,10 @@ import mongoose from 'mongoose';
 // that are required to create OtpCode
 interface otpAttrs {
   type: string;
-  phoneNumber?: string;
-  email?: string;
+  phoneNumber?: string | null;
+  email?: string | null;
   userId?: string;
-  code: String;
+  code: string;
   expirationTime?: Date;
   createdAt?: any;
   updatedAt?: any;
@@ -20,7 +20,7 @@ interface otpCodeDoc extends mongoose.Document {
   phoneNumber: string;
   email: string;
   userId: string;
-  code: String;
+  code: string;
   createdBy: string;
   expirationTime: Date;
   createdAt?: any;

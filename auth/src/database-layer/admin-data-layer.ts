@@ -8,7 +8,6 @@ import {
 import { Request } from 'express';
 import { AdminRoleMapping } from '../models/admin-role-mapping';
 import { AdminRoleAttrs, AdminRole } from '../models/admin-role';
-import mongoose from 'mongoose';
 import { JwtService } from '../services/jwt';
 import { PayloadType } from '../services/string-values';
 import { OtpCode } from '../models/otp-code';
@@ -331,9 +330,6 @@ export class AdminDatabase {
   }
 
   static async getUserById(req: Request) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Requested id is not id type');
-    }
     var data = await Admin.findOne({ _id: req.params.id });
     if (data) {
       var role = await AdminRole.findById({ _id: data.roleId });
@@ -547,9 +543,6 @@ export class AdminDatabase {
   }
 
   static async statusUpdateForAdmin(req: any) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Invalid id');
-    }
     const adminData = await Admin.findOne({
       _id: req.currentUser.id,
       isSuperAdmin: true,

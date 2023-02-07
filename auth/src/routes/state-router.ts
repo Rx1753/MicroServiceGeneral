@@ -30,6 +30,8 @@ router.put(
 router.delete(
   '/api/users/state/delete/:id',
   verifyAdminToken,
+  StateValidation.stateDeleteValidation,
+  validateRequest,
   StateDomain.deleteState
 );
 

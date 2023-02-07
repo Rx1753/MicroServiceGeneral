@@ -10,9 +10,6 @@ export class CountryDomain {
   }
 
   static async updateCountry(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Requested id is not id type');
-    }
     await CountryDatabaseLayer.updateCountry(req, req.params.id);
     res
       .status(201)
@@ -20,9 +17,6 @@ export class CountryDomain {
   }
 
   static async deleteCountry(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Requested id is not id type');
-    }
     await CountryDatabaseLayer.deleteCountry(req.params.id);
     res
       .status(201)

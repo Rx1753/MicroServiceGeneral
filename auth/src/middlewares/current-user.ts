@@ -39,7 +39,17 @@ export const verifyToken = async (
   }
 
   try {
-  } catch (error) {}
+    const payload = jwt.verify(token, process.env.JWT_KEY!) as UserPayload;
+    req.currentUser = payload;
+    console.log('current user id', payload.id);
+  } catch (error: any) {
+    if (error instanceof TokenExpiredError) {
+      throw new BadRequestError(error.message);
+    } else {
+      throw new BadRequestError(error.message);
+    }
+  }
+  next();
 };
 
 export const verifyAdminToken = async (
@@ -109,6 +119,7 @@ export const verifyCustomerToken = (
     if (payload.type != PayloadType.CustomerType) {
       throw new BadRequestError('Unauthorized User');
     }
+    console.log(`payload :: ${payload.id}`)
     req.currentUser = payload;
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {

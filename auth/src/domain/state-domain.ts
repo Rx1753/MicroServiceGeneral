@@ -1,6 +1,4 @@
-import { BadRequestError } from '@rx-projects/common';
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import { StateDatabaseLayer } from '../database-layer/state-data-layer';
 
 export class StateDomain {
@@ -10,9 +8,6 @@ export class StateDomain {
   }
 
   static async updateState(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Invalid param id');
-    }
     await StateDatabaseLayer.updateState(req, req.params.id);
     res
       .status(201)
@@ -20,9 +15,6 @@ export class StateDomain {
   }
 
   static async deleteState(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Invalid param id');
-    }
     await StateDatabaseLayer.deleteState(req.params.id);
     res.status(201).send({ deleted: true });
   }

@@ -6,8 +6,6 @@ import { CountryDomain } from '../domain/country-domain';
 
 const router = express.Router();
 
-//ADMIN Middleware check
-
 // Country create
 router.post(
   '/api/users/country/create',
@@ -30,6 +28,8 @@ router.put(
 router.delete(
   '/api/users/country/delete/:id',
   verifyAdminToken,
+  CountryValidation.countryDeleteValidation,
+  validateRequest,
   CountryDomain.deleteCountry
 );
 

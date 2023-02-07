@@ -1,7 +1,6 @@
 import { BadRequestError } from '@rx-projects/common';
 import { Request, Response } from 'express';
 import { CustomerDataBaseLayer } from '../database-layer/customer-data-layer';
-import { CustomerAttrs } from '../models/customer';
 
 export class CustomerDomain {
   // SIGNUP
@@ -19,14 +18,14 @@ export class CustomerDomain {
       );
     }
     if (isEmailExist) {
-      throw new BadRequestError('email in use');
+      throw new BadRequestError('Email is already in use');
     }
     if (isPhoneNumberExist) {
-      throw new BadRequestError('phoneNumber in use');
+      throw new BadRequestError('Phone number is already in use');
     }
 
     var user = await CustomerDataBaseLayer.signUpUser(req);
-    return res.status(201).send(user);
+    return res.status(200).send(user);
   }
 
   static async signIn(req: Request, res: Response) {
@@ -45,12 +44,12 @@ export class CustomerDomain {
     }
 
     if (!isEmailExist && !(phoneNumber !== null && phoneNumber !== undefined)) {
-      throw new BadRequestError('invalid email');
+      throw new BadRequestError('customer does not exists with this email id');
     } else if (
       !isPhoneNumberExist &&
       !(email !== null && email !== undefined)
     ) {
-      throw new BadRequestError('invalid phoneNumber');
+      throw new BadRequestError('customer does not exists with this phone no');
     }
 
     const isPasswordMatch = await CustomerDataBaseLayer.checkPassword(
@@ -79,7 +78,7 @@ export class CustomerDomain {
         phoneNo,
         countryCodeId
       );
-
+      //updating refresh token on login
       const newRefreshToken = await CustomerDataBaseLayer.updateRefreshToken(
         id,
         emailId,
@@ -87,11 +86,11 @@ export class CustomerDomain {
         countryCodeId
       );
       req.session = { jwt: accessToken, refreshToken: newRefreshToken };
-      return res.status(200).send({
-        userId: id,
-        accessToken: accessToken,
-        refreshToken: newRefreshToken,
-      });
+      const resData = JSON.parse(
+        JSON.stringify(isEmailExist ? isEmailExist : isPhoneNumberExist)
+      );
+      resData.accessToken = accessToken;
+      return res.status(200).send(resData);
     }
   }
 
@@ -105,28 +104,38 @@ export class CustomerDomain {
     res.status(200).send(data);
   }
 
-  static async forgotPasswordSendOtp(req: Request, res: Response){
-    var isEmailTriggered = await CustomerDataBaseLayer.forgotPasswordSendOtp(req);
-    res.status(200).send({ msg: isEmailTriggered?'Email sent successfully':'Sms sent successfully' });
+  static async forgotPasswordSendOtp(req: Request, res: Response) {
+    var isEmailTriggered = await CustomerDataBaseLayer.forgotPasswordSendOtp(
+      req
+    );
+    res.status(200).send({
+      msg: isEmailTriggered
+        ? 'Email sent successfully'
+        : 'Sms sent successfully',
+    });
   }
 
-  static async forgotPasswordVerifyOtp(req: Request, res: Response){
+  static async forgotPasswordVerifyOtp(req: Request, res: Response) {
     var data = await CustomerDataBaseLayer.forgotPasswordVerifyOtp(req);
-    res.status(200).send({data});
+    res.status(200).send(data);
   }
 
   static async deleteCustomer(req: Request, res: Response) {
     var deletedAccountId = await CustomerDataBaseLayer.deleteCustomer(
       req.params.id
     );
+    //req.session = null;
     res.status(200).send({
       id: deletedAccountId,
       msg: 'Account deleted successfully',
     });
   }
 
-  static async checkMFA(req: Request, res: Response) {
-    var customers = await CustomerDataBaseLayer.checkMFA(req);
+  static async checkMFA(req: any, res: Response) {
+    var customers = await CustomerDataBaseLayer.checkMFA(
+      req,
+      req.currentUser?.id
+    );
     res.status(200).send({ msg: 'Email and Sms triggered' });
   }
 
@@ -205,23 +214,25 @@ export class CustomerDomain {
     if (!checkUser) {
       throw new BadRequestError('customer doesnot exist');
     }
-    const accessToken = CustomerDataBaseLayer.createAccessToken(
+    const accessToken = await CustomerDataBaseLayer.createAccessToken(
       checkUser.id,
       checkUser.email,
       checkUser.phoneNumber,
       checkUser.countryCode
     );
 
-    const refreshToken = CustomerDataBaseLayer.updateRefreshToken(
+    const refreshToken = await CustomerDataBaseLayer.updateRefreshToken(
       checkUser.id,
       checkUser.email,
       checkUser.phoneNumber,
       checkUser.countryCode
     );
 
-    return res
-      .status(201)
-      .send({ accessToken: accessToken, refreshToken: refreshToken });
+    return res.status(201).send({
+      id: req.currentUser?.id,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
   }
 
   static async signOut(req: Request, res: Response) {

@@ -1,5 +1,6 @@
 import { BadRequestError } from '@rx-projects/common';
-import { body, check, oneOf, query } from 'express-validator';
+import { body, check, oneOf, query, param } from 'express-validator';
+import { Common } from '../services/common';
 
 export class Validation {
   static addAdminValidation = [
@@ -132,11 +133,28 @@ export class Validation {
     body('roleId').notEmpty().withMessage('pls write RoleId of the admin'),
   ];
 
+  static getSingleAdminDetailValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
+  ];
+  static getAdminRoleByIdValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
+  ];
+
   static getListByStatusValidation = [
     query('isActive')
       .isBoolean()
       .withMessage('isActive value is required which is bool'),
     //query('isSuperAdmin').isBoolean().withMessage('isSuperAdmin value is required which is bool'),
+  ];
+
+  static updateAdminStatusValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
   ];
 
   static getAdminListValidation = [

@@ -4,7 +4,6 @@ import { JwtService } from '../services/jwt';
 import { Password } from '../services/password';
 import { PayloadType } from '../services/string-values';
 import { Request } from 'express';
-import mongoose from 'mongoose';
 import { CodeGenerator } from '../services/otp';
 import { OtpCode } from '../models/otp-code';
 import { Common } from '../services/common';
@@ -32,7 +31,9 @@ export class CustomerDataBaseLayer {
   }
 
   static async isCustomerExist(id: String) {
-    var isUserExist = await Customer.findById({ _id: id });
+    var isUserExist = await Customer.findOne({
+      $and: [{ _id: id }, { isActive: true, isDeletedAccount: false }],
+    });
     return isUserExist;
   }
 
@@ -171,7 +172,7 @@ export class CustomerDataBaseLayer {
       );
 
       // Store it on session object
-      req.session = { jwt: userJwt };
+      req.session = { jwt: userJwt, refreshToken: saveData.refreshToken };
       const resData = JSON.parse(JSON.stringify(saveData));
       resData.accessToken = userJwt;
       return resData;
@@ -189,13 +190,11 @@ export class CustomerDataBaseLayer {
 
   static async updateProfile(req: Request) {
     var id = req.params.id;
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestError('invalid param id');
-    }
+
     var { email, phoneNumber, countryCode } = req.body;
     var isUserExist = await CustomerDataBaseLayer.isCustomerExist(id);
     if (!isUserExist) {
-      throw new BadRequestError('invalid user');
+      throw new BadRequestError('invalid customer');
     } else if (isUserExist && isUserExist?.isDeletedAccount) {
       throw new BadRequestError('account has been deleted');
     }
@@ -205,7 +204,7 @@ export class CustomerDataBaseLayer {
 
       if (isEmailExist) {
         throw new BadRequestError(
-          `${email} already exist for another user. Try it with new email`
+          `${email} already exist for another customer. Try it with new email`
         );
       }
     }
@@ -222,7 +221,7 @@ export class CustomerDataBaseLayer {
 
       if (isPhoneNumberExist) {
         throw new BadRequestError(
-          `${countryCode} ${phoneNumber} already exist for another user. Try it with new phoneNumber`
+          `${countryCode} ${phoneNumber} already exists for another customer. Try it with new phone no.`
         );
       }
     }
@@ -260,12 +259,12 @@ export class CustomerDataBaseLayer {
   }
 
   static async changePassword(req: any) {
-    const { oldPassword, newPassword, confirmPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
     const checkUser = await CustomerDataBaseLayer.isCustomerExist(
       req.currentUser?.id
     );
     if (!checkUser) {
-      throw new BadRequestError('customer doesnot exist');
+      throw new BadRequestError('customer does not exist');
     }
     const verifyPassword = await Password.compare(
       checkUser.password,
@@ -314,7 +313,7 @@ export class CustomerDataBaseLayer {
       }
       if (!customer) {
         throw new BadRequestError(
-          "customer doesn't exist with this email/phone number"
+          "customer doesn't exist with this email/phone no."
         );
       }
       //Generate OTP
@@ -353,7 +352,7 @@ export class CustomerDataBaseLayer {
           type: isEmail ? 'email' : 'phone',
           email: email,
           code: code,
-          phoneNumber: `${countryCode}${phoneNumber}`,
+          phoneNumber: isEmail ? null : `${countryCode}${phoneNumber}`,
           expirationTime: expirationTime,
           userId: customer.id,
         });
@@ -362,7 +361,7 @@ export class CustomerDataBaseLayer {
           type: isEmail ? 'email' : 'phone',
           email: email,
           code: code,
-          phoneNumber: `${countryCode}${phoneNumber}`,
+          phoneNumber: isEmail ? null : `${countryCode}${phoneNumber}`,
           expirationTime: expirationTime,
           userId: customer.id,
         });
@@ -378,10 +377,22 @@ export class CustomerDataBaseLayer {
   }
 
   static async forgotPasswordVerifyOtp(req: Request) {
-    const { code, password } = req.body;
+    const { code, password, email, phoneNumber, countryCode } = req.body;
     const otpCheck = await OtpCode.findOne({ code: code });
     if (!otpCheck) {
       throw new BadRequestError('Invalid Otp');
+    } else if (
+      email !== undefined &&
+      email !== null &&
+      otpCheck.email !== email
+    ) {
+      throw new BadRequestError(`invalid email with the otp`);
+    } else if (
+      phoneNumber !== undefined &&
+      phoneNumber !== null &&
+      otpCheck.phoneNumber !== `${countryCode}${phoneNumber}`
+    ) {
+      throw new BadRequestError(`invalid phone no with the otp`);
     } else {
       console.log(`verify otp :: ${otpCheck.userId}`);
     }
@@ -416,18 +427,16 @@ export class CustomerDataBaseLayer {
       req.session = { jwt: accessToken, refreshToken: newRefreshToken };
       return { accessToken: accessToken, refreshToken: newRefreshToken };
     } else {
-      throw new BadRequestError('Something went wrong');
+      throw new BadRequestError('Something went wrong.');
     }
   }
 
   static async deleteCustomer(id: string) {
-    if (!mongoose.isValidObjectId(id)) {
-      throw new BadRequestError('invalid param id');
-    }
-
     var isUserExist = await CustomerDataBaseLayer.isCustomerExist(id);
     if (!isUserExist) {
-      throw new BadRequestError('user does not exists');
+      throw new BadRequestError('customer does not exists');
+    } else {
+      console.log(`deletCustomer id is exist`);
     }
 
     //update isDeletedAccount = true on account deletion
@@ -438,16 +447,20 @@ export class CustomerDataBaseLayer {
     return id;
   }
 
-  static async checkMFA(req: Request) {
+  static async checkMFA(req: Request, id: string) {
     var { isMFA, email, phoneNumber, countryCode } = req.body;
-    await Customer.findByIdAndUpdate(req.params.id, { isMFA: isMFA });
+    var isCustomerExist = await this.isCustomerExist(id);
+    if (!isCustomerExist) {
+      throw new BadRequestError(`Customer does not exist`);
+    }
+    await Customer.findByIdAndUpdate(id, { isMFA: isMFA });
     if (isMFA) {
       if (email !== null && email !== undefined) {
-        await this.sendEmailMFA(email, req.params.id);
+        await this.sendEmailMFA(email, id);
       }
 
       if (phoneNumber !== null && phoneNumber !== undefined) {
-        await this.sendSmsMFA(phoneNumber, countryCode, req.params.id);
+        await this.sendSmsMFA(phoneNumber, countryCode, id);
       }
     } else {
       console.log(`MFA disabled`);
@@ -461,6 +474,8 @@ export class CustomerDataBaseLayer {
         throw new BadRequestError('invalid email id for mfa');
       } else if (isEmailExist && !isEmailExist.isMFA) {
         throw new BadRequestError('mfa is disable');
+      } else if (isEmailExist && isEmailExist.isEmailVerified) {
+        throw new BadRequestError('email is already verified');
       } else if (isEmailExist && !isEmailExist.isEmailVerified) {
         //Delete existing email code
         await OtpCode.findOneAndDelete({
@@ -503,6 +518,8 @@ export class CustomerDataBaseLayer {
         throw new BadRequestError('invalid phoneNumber for mfa');
       } else if (isPhoneNumberExist && !isPhoneNumberExist.isMFA) {
         throw new BadRequestError('mfa is disable');
+      } else if (isPhoneNumberExist && isPhoneNumberExist.isPhoneVerified) {
+        throw new BadRequestError('phone is already verified');
       } else if (isPhoneNumberExist && !isPhoneNumberExist.isPhoneVerified) {
         //delete existing otp code
         await OtpCode.findOneAndDelete({
@@ -665,41 +682,26 @@ export class CustomerDataBaseLayer {
 
   static async getCustomerByStatus(req: Request) {
     var customers = await Customer.find({
-      isActive: req.query?.status,
+      isActive: req.query?.isActive,
       isDeletedAccount: false,
     });
     return customers;
   }
 
   static async getCustomerByName(req: Request) {
-    if (
-      req.query?.firstName &&
-      req.query?.firstName != null &&
-      req.query?.firstName != '' &&
-      req.query?.lastName &&
-      req.query?.lastName != null &&
-      req.query?.lastName != ''
-    ) {
-      //search by Customer firstName & lastName
-      const data = await Customer.find({
-        isActive: true,
-        isDeletedAccount: false,
-        $or: [
-          {
-            firstName: { $regex: req.query?.firstName, $options: 'i' },
-            lastName: { $regex: req.query?.lastName, $options: 'i' },
-          },
-        ],
-      });
-      return data;
-    } else {
-      //give list on empty userName
-      const data = await Customer.find({
-        isActive: true,
-        isDeletedAccount: false,
-      });
-      return data;
-    }
+    //search by Customer firstName & lastName
+    const data = await Customer.find({
+      isActive: true,
+      isDeletedAccount: false,
+      $expr: {
+        $regexMatch: {
+          input: { $concat: ['$firstName', ' ', '$lastName'] },
+          regex: req.query?.searchName, //Your text search here
+          options: 'i',
+        },
+      },
+    });
+    return data;
   }
 
   static async getListOfDeletedAccounts(req: any) {
@@ -760,7 +762,8 @@ export class CustomerDataBaseLayer {
   }
 
   static async currentLoginUser(req: any) {
-    var data = await Customer.findById(req.currentuser.id);
+    console.log(`req.currentuser :: ${req.currentUser}`)
+    var data = await Customer.findById(req.currentUser.id);
     return data;
   }
 }

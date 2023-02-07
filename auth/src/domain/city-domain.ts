@@ -9,9 +9,6 @@ export class CityDomain {
     res.status(201).send({ msg: 'City added successfully', data: data });
   }
   static async updateCity(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Invalid param id');
-    }
     await CityDatabaseLayer.updateCity(req, req.params.id);
     res
       .status(201)
@@ -19,9 +16,6 @@ export class CityDomain {
   }
 
   static async deleteCity(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Invalid param id');
-    }
     await CityDatabaseLayer.deleteCity(req.params.id);
     res.status(201).send({ deleted: true });
   }

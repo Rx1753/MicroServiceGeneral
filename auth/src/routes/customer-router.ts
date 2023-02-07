@@ -56,12 +56,13 @@ router.delete(
   '/api/users/customer/delete/:id',
   verifyCustomerToken,
   CustomerAuthValidation.deleteCustomer,
+  validateRequest,
   CustomerDomain.deleteCustomer
 );
 
 //isMfa active
 router.post(
-  '/api/users/customer/mfa/:id',
+  '/api/users/customer/mfa',
   verifyCustomerToken,
   CustomerAuthValidation.checkMFA,
   validateRequest,
@@ -69,13 +70,13 @@ router.post(
 );
 
 router.post(
-  '/api/users/customer/mfa/sendemail/:id',
+  '/api/users/customer/mfa/sendemail',
   verifyCustomerToken,
   CustomerDomain.sendEmailMFA
 );
 
 router.post(
-  '/api/users/customer/mfa/sendsms/:id',
+  '/api/users/customer/mfa/sendsms',
   verifyCustomerToken,
   CustomerDomain.sendSmsMFA
 );
@@ -132,6 +133,10 @@ router.get(
   CustomerDomain.getRefreshToken
 );
 
-router.post('/api/users/customer/signout', CustomerDomain.signOut);
+router.post(
+  '/api/users/customer/signout',
+  verifyCustomerToken,
+  CustomerDomain.signOut
+);
 
 export { router as customerRouter };

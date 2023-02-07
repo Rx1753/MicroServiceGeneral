@@ -74,11 +74,15 @@ router.put(
 router.get(
   '/api/users/admin/getadmins/:id',
   verifyAdminToken,
+  Validation.getSingleAdminDetailValidation,
+  validateRequest,
   AdminDomain.getUserById
 );
 router.get(
   '/api/users/admin/getadminroles/:id',
   verifyAdminToken,
+  Validation.getAdminRoleByIdValidation,
+  validateRequest,
   AdminDomain.getAdminRoles
 );
 
@@ -106,6 +110,8 @@ router.get(
 router.put(
   '/api/users/admin/updatestatus/:id',
   verifyAdminToken,
+  Validation.updateAdminStatusValidation,
+  validateRequest,
   AdminDomain.statusUpdateForAdmin
 );
 
@@ -133,28 +139,28 @@ router.post(
   AdminDomain.forgotPasswordVerification
 );
 
-router.post('/api/users/admin/sendemail', async (req: any, res: any) => {
-  var email = 'admin@gmail.com';
-  var password = '12345678';
-  var html = HtmlTemplate.sendEmailWithCredentials('Test', email, password);
-  await MailService.mailTrigger(
-    'radixdt.1753@gmail.com',
-    'Admin Credentials',
-    html
-  );
-  res.send({
-    msg: 'Mail sucess',
-  });
-});
+// router.post('/api/users/admin/sendemail', async (req: any, res: any) => {
+//   var email = 'admin@gmail.com';
+//   var password = '12345678';
+//   var html = HtmlTemplate.sendEmailWithCredentials('Test', email, password);
+//   await MailService.mailTrigger(
+//     'radixdt.1753@gmail.com',
+//     'Admin Credentials',
+//     html
+//   );
+//   res.send({
+//     msg: 'Mail sucess',
+//   });
+// });
 
-router.post('/api/users/admin/sendsms', async (req: any, res: any) => {
-  await SendSmsService.sendSms(
-    'This is the first content sms',
-    '+919974146404'
-  );
-  res.send({
-    msg: 'Sms send sucess',
-  });
-});
+// router.post('/api/users/admin/sendsms', async (req: any, res: any) => {
+//   await SendSmsService.sendSms(
+//     'This is the first content sms',
+//     '+919974146404'
+//   );
+//   res.send({
+//     msg: 'Sms send sucess',
+//   });
+// });
 
 export { router as adminAuthRouter };
