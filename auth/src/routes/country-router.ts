@@ -1,6 +1,6 @@
 import { validateRequest } from '@rx-projects/common';
 import express, { Request, Response, Router } from 'express';
-import { verifyAdminToken } from '../middlewares/current-user';
+import { verifyAdminToken, verifyToken } from '../middlewares/current-user';
 import { CountryValidation } from '../validations/country-validation';
 import { CountryDomain } from '../domain/country-domain';
 
@@ -26,15 +26,15 @@ router.delete(
 );
 
 // get all Country
-router.get(`${baseUrl}/getcountries`, CountryDomain.getCountryList);
+router.get(`${baseUrl}/getcountries`,verifyToken, CountryDomain.getCountryList);
 
 router.get(
-  `${baseUrl}/getlistbystatus`,CountryValidation.getListByStatusValidation,validateRequest,
+  `${baseUrl}/getlistbystatus`,verifyToken,CountryValidation.getListByStatusValidation,validateRequest,
   CountryDomain.getCountryByStatus
 );
 
 router.get(
-  `${baseUrl}/getlistbyname`,CountryValidation.getCountryByNameValidation,validateRequest,
+  `${baseUrl}/getlistbyname`,verifyToken,CountryValidation.getCountryByNameValidation,validateRequest,
   CountryDomain.getCountryByName
 );
 

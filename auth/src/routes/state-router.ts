@@ -1,7 +1,7 @@
 import { validateRequest } from '@rx-projects/common';
 import express, { Request, Response, Router } from 'express';
 import { StateDomain } from '../domain/state-domain';
-import { verifyAdminToken } from '../middlewares/current-user';
+import { verifyAdminToken,verifyToken } from '../middlewares/current-user';
 import { StateValidation } from '../validations/state-validation';
 
 const router = express.Router();
@@ -28,15 +28,15 @@ router.delete(
 );
 
 // get all States
-router.get(`${baseUrl}/getstates`, StateDomain.getStateList);
+router.get(`${baseUrl}/getstates`, verifyToken,  StateDomain.getStateList);
 
 router.get(
-  `${baseUrl}/getlistbystatus`,StateValidation.getListByStatusValidation,validateRequest,
+  `${baseUrl}/getlistbystatus`, verifyToken, StateValidation.getListByStatusValidation,validateRequest,
   StateDomain.getListBystatus
 );
 
 router.get(
-  `${baseUrl}/getlistbyname`,StateValidation.getStateByNameValidation,validateRequest,
+  `${baseUrl}/getlistbyname`, verifyToken, StateValidation.getStateByNameValidation,validateRequest,
   StateDomain.getStateByName
 );
 

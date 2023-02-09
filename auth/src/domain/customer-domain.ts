@@ -33,12 +33,41 @@ export class CustomerDomain {
 
   static async signIn(req: Request, res: Response) {
     const { email, phoneNumber, countryCode, password } = req.body;
-    var isEmailExist: any, isPhoneNumberExist: any;
+    var isEmailExist: any, isPhoneNumberExist: any, isCustomerWithBoth: any;
 
-    if (email !== null && email !== undefined) {
+    if (
+      email !== null &&
+      email !== undefined &&
+      email != '' &&
+      phoneNumber !== null &&
+      phoneNumber !== undefined &&
+      phoneNumber != ''
+    ) {
+      var isCustomerExistWithEmailPhone =
+        await CustomerDataBaseLayer.isCustomerExistWithEmailAndPhone(
+          email,
+          phoneNumber,
+          countryCode
+        );
+      if (!isCustomerExistWithEmailPhone) {
+        throw new BadRequestError(
+          'invalid email & phone number is sent for this customer request'
+        );
+      } else {
+        isEmailExist = isCustomerExistWithEmailPhone;
+        isPhoneNumberExist = isCustomerExistWithEmailPhone;
+        console.log(`login with email & phoneNumber`);
+      }
+    } 
+     if (email !== null && email !== undefined && email !== '') {
       isEmailExist = await CustomerDataBaseLayer.isExistingEmail(email);
       console.log(`login with email`);
-    } else if (phoneNumber !== null && phoneNumber !== undefined) {
+    } 
+     if (
+      phoneNumber !== null &&
+      phoneNumber !== undefined &&
+      phoneNumber != ''
+    ) {
       isPhoneNumberExist = await CustomerDataBaseLayer.isExistingPhone(
         phoneNumber,
         countryCode
@@ -136,7 +165,7 @@ export class CustomerDomain {
     var deletedAccountId = await CustomerDataBaseLayer.deleteCustomer(
       req.params.id
     );
-    //req.session = null;
+    req.session = null;
     res
       .status(200)
       .send(
@@ -163,46 +192,32 @@ export class CustomerDomain {
   }
 
   static async sendEmailMFA(req: any, res: Response) {
-    if (
-      req.currentUser?.email === null ||
-      req.currentUser?.email === undefined
-    ) {
-      throw new BadRequestError('invalid email id');
-    }
-
     await CustomerDataBaseLayer.sendEmailMFA(
-      req.currentUser?.email,
+      req.body?.email,
       req.currentUser?.id
     );
     res
       .status(200)
       .send(
         ResponseModel.success(
-          { id: req.currentUser?.id, email: req.currentUser?.email },
+          { id: req.currentUser?.id, email: req.body?.email },
           `Code sent successfully to verify email`
         )
       );
   }
 
   static async sendSmsMFA(req: any, res: Response) {
-    if (
-      req.currentUser?.phoneNumber === null ||
-      req.currentUser?.phoneNumber === undefined
-    ) {
-      throw new BadRequestError('invalid phone no');
-    }
-
     await CustomerDataBaseLayer.sendSmsMFA(
-      req.currentUser?.phoneNumber,
-      req.currentUser?.countryCode,
+      req.body?.phoneNumber,
+      req.body?.countryCode,
       req.currentUser?.id
     );
     res.status(200).send(
       ResponseModel.success(
         {
           id: req.currentUser?.id,
-          phoneNumber: req.currentUser?.phoneNumber,
-          countryCode: req.currentUser?.countryCode,
+          phoneNumber: req.body?.phoneNumber,
+          countryCode: req.body?.countryCode,
         },
         `Code sent successfully to verify phoneNumber`
       )

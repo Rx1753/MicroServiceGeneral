@@ -49,11 +49,13 @@ router.post(
 );
 
 router.post(
-  `${baseUrl}/mfa/sendemail`,verifyCustomerActiveToken,CustomerDomain.sendEmailMFA
+  `${baseUrl}/mfa/sendemail`,verifyCustomerActiveToken,CustomerAuthValidation.sendEmailMFA,validateRequest,
+  CustomerDomain.sendEmailMFA
 );
 
 router.post(
-  `${baseUrl}/mfa/sendsms`,verifyCustomerActiveToken,CustomerDomain.sendSmsMFA
+  `${baseUrl}/mfa/sendsms`,verifyCustomerActiveToken,CustomerAuthValidation.sendSmsMFA,validateRequest,
+  CustomerDomain.sendSmsMFA
 );
 
 router.post(

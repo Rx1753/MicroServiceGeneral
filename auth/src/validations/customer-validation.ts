@@ -125,7 +125,7 @@ export class CustomerAuthValidation {
     body('newPassword')
       .trim()
       .isLength({ min: 8, max: 20 })
-      .withMessage('changedPassword must be between 4 to 20 characters')
+      .withMessage('newPassword must be between 4 to 20 characters')
       .custom((value, { req }) => value !== req.body.oldPassword)
       .withMessage('oldPassword & newPassword should not match'),
   ];
@@ -205,6 +205,28 @@ export class CustomerAuthValidation {
       .notEmpty()
       .withMessage('phoneNumber must be valid')
       .optional(),
+    body('countryCode').custom((value, { req }) => {
+      if (req.body.phoneNumber !== null && req.body.phoneNumber !== undefined) {
+        if (
+          req.body.countryCode === null ||
+          req.body.countryCode == undefined ||
+          req.body.countryCode.trim() === ''
+        ) {
+          throw new BadRequestError(
+            `country code is required for phone verification`
+          );
+        }
+      }
+      return true;
+    }),
+  ];
+
+  static sendEmailMFA = [
+    body('email').isEmail().withMessage('email must be valid'),
+  ];
+
+  static sendSmsMFA = [
+    body('phoneNumber').notEmpty().withMessage('phoneNumber must be valid'),
     body('countryCode').custom((value, { req }) => {
       if (req.body.phoneNumber !== null && req.body.phoneNumber !== undefined) {
         if (

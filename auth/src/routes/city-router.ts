@@ -1,7 +1,7 @@
 import { validateRequest } from '@rx-projects/common';
 import express, { Request, Response, Router } from 'express';
 import { CityDomain } from '../domain/city-domain';
-import { verifyAdminToken } from '../middlewares/current-user';
+import { verifyAdminToken,verifyToken } from '../middlewares/current-user';
 import { CityValidation } from '../validations/city-validation';
 
 const router = express.Router();
@@ -26,15 +26,15 @@ router.delete(
 );
 
 // // get all city
-router.get(`${baseUrl}/getcities`, CityDomain.getCityList);
+router.get(`${baseUrl}/getcities`, verifyToken, CityDomain.getCityList);
 
 router.get(
-  `${baseUrl}/getlistbystatus`,CityValidation.getListByStatusValidation,validateRequest,
+  `${baseUrl}/getlistbystatus`, verifyToken,CityValidation.getListByStatusValidation,validateRequest,
   CityDomain.getListBystatus
 );
 
 router.get(
-  `${baseUrl}/getlistbyname`,CityValidation.getCityByNameValidation,validateRequest,
+  `${baseUrl}/getlistbyname`, verifyToken, CityValidation.getCityByNameValidation,validateRequest,
   CityDomain.getCityByName
 );
 

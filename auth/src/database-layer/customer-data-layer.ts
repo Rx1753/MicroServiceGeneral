@@ -13,7 +13,23 @@ import { SendSmsService } from '../services/send-sms-service';
 import { SmsContent } from '../services/sms-content';
 
 export class CustomerDataBaseLayer {
-  static async isExistingEmail(email: String) {
+  static async isCustomerExistWithEmailAndPhone(
+    email: string,
+    phoneNumber: string,
+    countryCode: string
+  ) {
+    const existingCustomer = await Customer.findOne({
+      $and: [
+        { email: email },
+        { phoneNumber: phoneNumber },
+        { countryCode: countryCode },
+        { isActive: true, isDeletedAccount: false },
+      ],
+    });
+    return existingCustomer;
+  }
+
+  static async isExistingEmail(email: string) {
     const existingEmail = await Customer.findOne({
       $and: [{ email }, { isActive: true, isDeletedAccount: false }],
     });
@@ -291,7 +307,6 @@ export class CustomerDataBaseLayer {
       refreshToken: refreshToken,
     });
     return {
-      msg: 'password changed successfully',
       accessToken: accessToken,
       refreshToken: refreshToken,
     };
@@ -469,6 +484,12 @@ export class CustomerDataBaseLayer {
 
   static async sendEmailMFA(email: string, userId: string) {
     try {
+      var isCustomerExist = await CustomerDataBaseLayer.isCustomerExist(userId);
+      if (isCustomerExist?.email !== email) {
+        throw new BadRequestError(
+          'email does not match with current logged in user'
+        );
+      }
       var isEmailExist = await CustomerDataBaseLayer.isExistingEmail(email);
       if (!isEmailExist) {
         throw new BadRequestError('invalid email id for mfa');
@@ -510,6 +531,16 @@ export class CustomerDataBaseLayer {
     id: string
   ) {
     try {
+      var isCustomerExist = await CustomerDataBaseLayer.isCustomerExist(id);
+      if (
+        isCustomerExist?.phoneNumber !== phoneNumber ||
+        isCustomerExist?.countryCode !== countryCode
+      ) {
+        throw new BadRequestError(
+          'phone no does not match with current logged in user'
+        );
+      }
+
       var isPhoneNumberExist = await CustomerDataBaseLayer.isExistingPhone(
         phoneNumber,
         countryCode
@@ -762,7 +793,7 @@ export class CustomerDataBaseLayer {
   }
 
   static async currentLoginUser(req: any) {
-    console.log(`req.currentuser :: ${req.currentUser}`)
+    console.log(`req.currentuser :: ${req.currentUser}`);
     var data = await Customer.findById(req.currentUser.id);
     return data;
   }

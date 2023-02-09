@@ -1,4 +1,5 @@
 import { BadRequestError } from '@rx-projects/common';
+import mongoose from 'mongoose';
 import { City } from '../models/city';
 import { Country } from '../models/country';
 import { customerAddress } from '../models/customer-address';
@@ -90,6 +91,11 @@ export class CustomerAddressDatabaseLayer {
       stateName,
     } = req.body.address;
 
+    var isAddressExist = await customerAddress.findById(id);
+    if (!isAddressExist) {
+      throw new BadRequestError(`address does not exist for this id`);
+    }
+
     if (isDefault) {
       const data = await customerAddress.updateMany(
         {
@@ -148,31 +154,160 @@ export class CustomerAddressDatabaseLayer {
   }
 
   static async getCurrentUserAddress(req: any) {
-    const data = await customerAddress
-      .find({ customerId: req.params.customerId })
-      .populate({
-        path: 'cityId',
-        populate: {
-          path: 'stateId',
-          populate: {
-            path: 'countryId',
-          },
+    // const data = await customerAddress
+    //   .find({ customerId: req.params.customerId })
+    //   .populate({
+    //     path: 'cityId',
+    //     select: 'cityName',
+    //     populate: {
+    //       path: 'stateId',
+    //       select: 'stateName',
+    //       populate: {
+    //         path: 'countryId',
+    //         select: 'countryName',
+    //       },
+    //     },
+    //   });
+
+    const data = await customerAddress.aggregate([
+      { $match: { customerId: req.params.customerId } },
+      {
+        $addFields: {
+          cityObjId: { $toObjectId: '$cityId' },
         },
-      });
+      },
+      {
+        $lookup: {
+          from: 'cities',
+          localField: 'cityObjId',
+          foreignField: '_id',
+          as: 'cityData',
+          pipeline: [
+            {
+              $addFields: {
+                stateObjId: { $toObjectId: '$stateId' },
+              },
+            },
+            {
+              $lookup: {
+                from: 'states',
+                localField: 'stateObjId',
+                foreignField: '_id',
+                as: 'stateData',
+                pipeline: [
+                  {
+                    $addFields: { countryObjId: { $toObjectId: '$countryId' } },
+                  },
+                  {
+                    $lookup: {
+                      from: 'countries',
+                      localField: 'countryObjId',
+                      foreignField: '_id',
+                      as: 'countryData',
+                    },
+                  },
+                  {
+                    $unwind: '$countryData',
+                  },
+                ],
+              },
+            },
+            {
+              $unwind: '$stateData',
+            },
+          ],
+        },
+      },
+      {
+        $unwind: '$cityData',
+      },
+      {
+        $addFields: {
+          cityName: '$cityData.cityName',
+          stateName: '$cityData.stateData.stateName',
+          countryName: '$cityData.stateData.countryData.countryName',
+        },
+      },
+      { $unset: ['cityData', 'cityObjId'] },
+    ]);
     return data;
   }
 
   static async findByIdAddressValidations(req: any) {
-    const data = await customerAddress.findById(req.params.id).populate({
-      path: 'cityId',
-      populate: {
-        path: 'stateId',
-        populate: {
-          path: 'countryId',
+    //const data = await customerAddress.findById(req.params.id).populate({
+    // path: 'cityId',
+    // select: 'cityName',
+    // populate: {
+    //   path: 'stateId',
+    //   populate: {
+    //     path: 'countryId',
+    //   },
+    // },
+    //});
+    const data = await customerAddress.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(req.params.id) } },
+      {
+        $addFields: {
+          cityObjId: { $toObjectId: '$cityId' },
         },
       },
-    });
-    return data;
+      {
+        $lookup: {
+          from: 'cities',
+          localField: 'cityObjId',
+          foreignField: '_id',
+          as: 'cityData',
+          pipeline: [
+            {
+              $addFields: {
+                stateObjId: { $toObjectId: '$stateId' },
+              },
+            },
+            {
+              $lookup: {
+                from: 'states',
+                localField: 'stateObjId',
+                foreignField: '_id',
+                as: 'stateData',
+                pipeline: [
+                  {
+                    $addFields: {
+                      countryObjId: { $toObjectId: '$countryId' },
+                    },
+                  },
+                  {
+                    $lookup: {
+                      from: 'countries',
+                      localField: 'countryObjId',
+                      foreignField: '_id',
+                      as: 'countryData',
+                    },
+                  },
+                  {
+                    $unwind: '$countryData',
+                  },
+                ],
+              },
+            },
+            {
+              $unwind: '$stateData',
+            },
+          ],
+        },
+      },
+      {
+        $unwind: '$cityData',
+      },
+      {
+        $addFields: {
+          cityName: '$cityData.cityName',
+          stateName: '$cityData.stateData.stateName',
+          countryName: '$cityData.stateData.countryData.countryName',
+        },
+      },
+      { $unset: ['cityData', 'cityObjId'] },
+    ]);
+    return data != null ? data[0] : {};
   }
 
   static async checkAndAddCountry(countryName: string) {
