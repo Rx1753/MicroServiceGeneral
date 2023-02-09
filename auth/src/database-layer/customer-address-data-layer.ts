@@ -23,17 +23,15 @@ export class CustomerAddressDatabaseLayer {
       stateName,
     } = req.body.address;
 
-    console.log(`req.body.address :: ${JSON.stringify(addressLine1)}`);
-
     if (isDefault) {
-      const data = await customerAddress.findOneAndUpdate(
+      const data = await customerAddress.updateMany(
         {
           $and: [
             { customerId: req.currentUser.id },
-            { isDefalultAddress: true },
+            { isDefaultAddress: true },
           ],
         },
-        { $set: { isDefalultAddress: false } }
+        { $set: { isDefaultAddress: false } }
       );
     } else {
       const data = await customerAddress.find({
@@ -93,12 +91,15 @@ export class CustomerAddressDatabaseLayer {
     } = req.body.address;
 
     if (isDefault) {
-      const data = await customerAddress.findOne({
-        $and: [{ customerId: req.currentUser.id }, { isDefalultAddress: true }],
-      });
-      await customerAddress.findByIdAndUpdate(data?._id, {
-        isDefaultAddress: false,
-      });
+      const data = await customerAddress.updateMany(
+        {
+          $and: [
+            { customerId: req.currentUser.id },
+            { isDefaultAddress: true },
+          ],
+        },
+        { $set: { isDefaultAddress: false } }
+      );
     }
 
     try {
@@ -119,7 +120,7 @@ export class CustomerAddressDatabaseLayer {
       await customerAddress.findByIdAndUpdate(id, {
         phoneNumber: phoneNumber,
         addressType: addressType,
-        isDefalultAddress: isDefault,
+        isDefaultAddress: isDefault,
         addressLine1: addressLine1,
         addressLine2: addressLine2,
         zipCode: zipCode,
@@ -128,7 +129,8 @@ export class CustomerAddressDatabaseLayer {
         countryId: countryId,
       });
 
-      return;
+      var data = await customerAddress.findById(id);
+      return data;
     } catch (err: any) {
       console.log(err.message);
       throw new BadRequestError(err.message);
@@ -147,7 +149,7 @@ export class CustomerAddressDatabaseLayer {
 
   static async getCurrentUserAddress(req: any) {
     const data = await customerAddress
-      .find({ customerId: req.currentUser.id })
+      .find({ customerId: req.params.customerId })
       .populate({
         path: 'cityId',
         populate: {
@@ -157,6 +159,19 @@ export class CustomerAddressDatabaseLayer {
           },
         },
       });
+    return data;
+  }
+
+  static async findByIdAddressValidations(req: any) {
+    const data = await customerAddress.findById(req.params.id).populate({
+      path: 'cityId',
+      populate: {
+        path: 'stateId',
+        populate: {
+          path: 'countryId',
+        },
+      },
+    });
     return data;
   }
 
@@ -181,12 +196,23 @@ export class CustomerAddressDatabaseLayer {
     if (countryCheck) {
       var isStateExist = await State.findOne({
         stateName: stateName,
-      });
+      }).populate({ path: 'countryId' });
 
       if (!isStateExist) {
         var data = State.build({
           stateName: stateName,
-          countryId: countryCheck._id,
+          countryId: countryId,
+        });
+        await data.save();
+        return data.id;
+      } else if (isStateExist.countryId.id !== countryId) {
+        console.log(
+          `stateName country Id :: ${isStateExist.countryId.id} , ----> countryId :: ${countryId}`
+        );
+        //Insert new state if country is diff
+        var data = State.build({
+          stateName: stateName,
+          countryId: countryId,
         });
         await data.save();
         return data.id;
@@ -203,9 +229,20 @@ export class CustomerAddressDatabaseLayer {
     if (stateCheck) {
       var isCityExists = await City.findOne({
         cityName: cityName,
-      });
+      }).populate({ path: 'stateId' });
 
       if (!isCityExists) {
+        var data = City.build({
+          cityName: cityName,
+          stateId: stateId,
+        });
+        await data.save();
+        return data.id;
+      } else if (isCityExists.stateId.id !== stateId) {
+        console.log(
+          `cityName state Id :: ${isCityExists.stateId.id} , ----> stateId :: ${stateId}`
+        );
+        //Insert new state if country is diff
         var data = City.build({
           cityName: cityName,
           stateId: stateId,

@@ -1,6 +1,7 @@
 import { BadRequestError } from '@rx-projects/common';
 import { Request, Response } from 'express';
 import { CustomerDataBaseLayer } from '../database-layer/customer-data-layer';
+import { ResponseModel } from '../services/response-model';
 
 export class CustomerDomain {
   // SIGNUP
@@ -25,7 +26,9 @@ export class CustomerDomain {
     }
 
     var user = await CustomerDataBaseLayer.signUpUser(req);
-    return res.status(200).send(user);
+    return res
+      .status(201)
+      .send(ResponseModel.success(user, `Sign up successful`));
   }
 
   static async signIn(req: Request, res: Response) {
@@ -90,34 +93,43 @@ export class CustomerDomain {
         JSON.stringify(isEmailExist ? isEmailExist : isPhoneNumberExist)
       );
       resData.accessToken = accessToken;
-      return res.status(200).send(resData);
+      return res
+        .status(200)
+        .send(ResponseModel.success(resData, `Sign In successful`));
     }
   }
 
   static async updateProfile(req: Request, res: Response) {
     var data = await CustomerDataBaseLayer.updateProfile(req);
-    res.status(200).send(data);
+    res.status(200).send(ResponseModel.success(data, `Profile updated`));
   }
 
   static async changePassword(req: Request, res: Response) {
     var data = await CustomerDataBaseLayer.changePassword(req);
-    res.status(200).send(data);
+    res
+      .status(200)
+      .send(ResponseModel.success(data, `Password changed successfully`));
   }
 
   static async forgotPasswordSendOtp(req: Request, res: Response) {
     var isEmailTriggered = await CustomerDataBaseLayer.forgotPasswordSendOtp(
       req
     );
-    res.status(200).send({
-      msg: isEmailTriggered
-        ? 'Email sent successfully'
-        : 'Sms sent successfully',
-    });
+    res
+      .status(200)
+      .send(
+        ResponseModel.success(
+          { otp: true },
+          isEmailTriggered ? 'Email sent successfully' : 'Sms sent successfully'
+        )
+      );
   }
 
   static async forgotPasswordVerifyOtp(req: Request, res: Response) {
     var data = await CustomerDataBaseLayer.forgotPasswordVerifyOtp(req);
-    res.status(200).send(data);
+    res
+      .status(200)
+      .send(ResponseModel.success(data, `New Password updated successfully`));
   }
 
   static async deleteCustomer(req: Request, res: Response) {
@@ -125,10 +137,14 @@ export class CustomerDomain {
       req.params.id
     );
     //req.session = null;
-    res.status(200).send({
-      id: deletedAccountId,
-      msg: 'Account deleted successfully',
-    });
+    res
+      .status(200)
+      .send(
+        ResponseModel.success(
+          { id: deletedAccountId },
+          `Account deleted successfully`
+        )
+      );
   }
 
   static async checkMFA(req: any, res: Response) {
@@ -136,7 +152,14 @@ export class CustomerDomain {
       req,
       req.currentUser?.id
     );
-    res.status(200).send({ msg: 'Email and Sms triggered' });
+    res
+      .status(200)
+      .send(
+        ResponseModel.success(
+          { id: req.currentUser?.id },
+          `Email & Sms triggered`
+        )
+      );
   }
 
   static async sendEmailMFA(req: any, res: Response) {
@@ -151,7 +174,14 @@ export class CustomerDomain {
       req.currentUser?.email,
       req.currentUser?.id
     );
-    res.status(200).send({ msg: 'Code sent successfully to verify email' });
+    res
+      .status(200)
+      .send(
+        ResponseModel.success(
+          { id: req.currentUser?.id, email: req.currentUser?.email },
+          `Code sent successfully to verify email`
+        )
+      );
   }
 
   static async sendSmsMFA(req: any, res: Response) {
@@ -167,44 +197,67 @@ export class CustomerDomain {
       req.currentUser?.countryCode,
       req.currentUser?.id
     );
-    res
-      .status(200)
-      .send({ msg: 'Code sent successfully to verify phoneNumber' });
+    res.status(200).send(
+      ResponseModel.success(
+        {
+          id: req.currentUser?.id,
+          phoneNumber: req.currentUser?.phoneNumber,
+          countryCode: req.currentUser?.countryCode,
+        },
+        `Code sent successfully to verify phoneNumber`
+      )
+    );
   }
 
   static async verifyEmail(req: any, res: Response) {
     var customers = await CustomerDataBaseLayer.verifyEmailMFA(req);
-    res.status(200).send({ msg: 'Email verified' });
+    res
+      .status(200)
+      .send(
+        ResponseModel.success(
+          { id: req.currentUser?.id, email: req.currentUser?.email },
+          `Email Verified`
+        )
+      );
   }
 
   static async verifyPhoneNumber(req: any, res: Response) {
     var customers = await CustomerDataBaseLayer.verifyPhoneNumberMFA(req);
-    res.status(200).send({ msg: 'Phone number verified' });
+    res.status(200).send(
+      ResponseModel.success(
+        {
+          id: req.currentUser?.id,
+          phoneNumber: req.currentUser?.phoneNumber,
+          countryCode: req.currentUser?.countryCode,
+        },
+        `Phone number verified`
+      )
+    );
   }
 
   static async getCustomers(req: Request, res: Response) {
     var customers = await CustomerDataBaseLayer.getCustomers(req);
-    res.status(200).send(customers);
+    res.status(200).send(ResponseModel.success(customers));
   }
 
   static async getCustomerByStatus(req: Request, res: Response) {
     var customers = await CustomerDataBaseLayer.getCustomerByStatus(req);
-    res.status(200).send(customers);
+    res.status(200).send(ResponseModel.success(customers));
   }
 
   static async getCustomerByName(req: Request, res: Response) {
     var customers = await CustomerDataBaseLayer.getCustomerByName(req);
-    res.status(200).send(customers);
+    res.status(200).send(ResponseModel.success(customers));
   }
 
   static async getListOfDeletedAccounts(req: Request, res: Response) {
     var customers = await CustomerDataBaseLayer.getListOfDeletedAccounts(req);
-    res.status(200).send(customers);
+    res.status(200).send(ResponseModel.success(customers));
   }
 
   static async currentLoginUser(req: Request, res: Response) {
     var data = await CustomerDataBaseLayer.currentLoginUser(req);
-    res.status(200).send(data);
+    res.status(200).send(ResponseModel.success(data));
   }
 
   static async getRefreshToken(req: any, res: Response) {

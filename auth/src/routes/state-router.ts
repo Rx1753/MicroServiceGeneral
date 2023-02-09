@@ -5,49 +5,38 @@ import { verifyAdminToken } from '../middlewares/current-user';
 import { StateValidation } from '../validations/state-validation';
 
 const router = express.Router();
+const baseUrl = `/api/users/state`;
 
 //ADMIN Middleware
 
 //add state
 router.post(
-  '/api/users/state/create',
-  verifyAdminToken,
-  StateValidation.stateCreateValidation,
-  validateRequest,
+  `${baseUrl}/create`,verifyAdminToken,StateValidation.stateCreateValidation,validateRequest,
   StateDomain.createState
 );
 
 //update state
 router.put(
-  '/api/users/state/update/:id',
-  verifyAdminToken,
-  StateValidation.stateUpdateValidation,
-  validateRequest,
+  `${baseUrl}/update/:id`,verifyAdminToken,StateValidation.stateUpdateValidation,validateRequest,
   StateDomain.updateState
 );
 
 //delete state
 router.delete(
-  '/api/users/state/delete/:id',
-  verifyAdminToken,
-  StateValidation.stateDeleteValidation,
-  validateRequest,
+  `${baseUrl}/delete/:id`,verifyAdminToken,StateValidation.stateDeleteValidation,validateRequest,
   StateDomain.deleteState
 );
 
 // get all States
-router.get('/api/users/state/getstates', StateDomain.getStateList);
+router.get(`${baseUrl}/getstates`, StateDomain.getStateList);
+
 router.get(
-  '/api/users/state/getlistbystatus',
-  StateValidation.getListByStatusValidation,
-  validateRequest,
+  `${baseUrl}/getlistbystatus`,StateValidation.getListByStatusValidation,validateRequest,
   StateDomain.getListBystatus
 );
 
 router.get(
-  '/api/users/state/getlistbyname',
-  StateValidation.getStateByNameValidation,
-  validateRequest,
+  `${baseUrl}/getlistbyname`,StateValidation.getStateByNameValidation,validateRequest,
   StateDomain.getStateByName
 );
 

@@ -24,7 +24,7 @@ export interface StateDoc extends mongoose.Document {
 
 const stateSchema = new mongoose.Schema(
   {
-    stateName: { type: String, required: true, unique: true },
+    stateName: { type: String, required: true},
     countryId: { type: String, ref: 'Country' },
     isActive: { type: Boolean, default: true },
   },

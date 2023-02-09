@@ -90,7 +90,7 @@ export class CustomerAddressValidation {
       .trim()
       .notEmpty()
       .withMessage('Please provide a addressType.'),
-    body('address.address.isDefault')
+    body('address.isDefault')
       .isBoolean()
       .withMessage('isDefault is required'),
     body('address.addressLine1')
@@ -164,6 +164,12 @@ export class CustomerAddressValidation {
   ];
 
   static customerAddressValidations = [
+    param('customerId').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.customerId,'invalid customerId');
+    }),
+  ];
+
+  static findByIdAddressValidations = [
     param('id').custom((value, { req }) => {
       return Common.checkIsValidMongoId(req.params?.id);
     }),

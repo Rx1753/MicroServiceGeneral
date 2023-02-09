@@ -33,6 +33,13 @@ export class Validation {
       }
       return true;
     }),
+    body('roleId')
+      .trim()
+      .notEmpty()
+      .withMessage('Please provide a roleId.')
+      .custom((value, { req }) => {
+        return Common.checkIsValidMongoId(req.body?.roleId,'invalid roleId type');
+      }),
   ];
 
   static signInValidation = [

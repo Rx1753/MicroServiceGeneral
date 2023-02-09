@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Admin } from '../models/admin';
 import { PayloadType } from '../services/string-values';
+import { Customer } from '../models/customer';
 
 interface UserPayload {
   id: string;
@@ -97,7 +98,46 @@ export const verifyAdminToken = async (
   next();
 };
 
-export const verifyCustomerToken = (
+// export const verifyCustomerToken = (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   if (!req.session?.jwt && !req.headers['token']) {
+//     console.log('token not wrote');
+//     throw new BadRequestError('Token/Session not provided');
+//   }
+
+//   var token;
+//   if (req.session?.jwt) {
+//     token = req.session?.jwt;
+//   } else {
+//     token = req.headers['token'];
+//   }
+
+//   try {
+//     const payload = jwt.verify(token, process.env.JWT_KEY!) as UserPayload;
+//     if (payload.type != PayloadType.CustomerType) {
+//       throw new BadRequestError('Unauthorized User');
+//     }
+//     console.log(`payload :: ${payload.id}`);
+//     req.currentUser = payload;
+//   } catch (error: any) {
+//     if (error instanceof TokenExpiredError) {
+//       throw new BadRequestError(error.message);
+//     } else {
+//       throw new BadRequestError(error.message);
+//     }
+//   }
+//   next();
+// };
+
+/**
+ * Check customer is active.
+ * if active -> next()
+ * else ->  error ()
+ */
+export const verifyCustomerActiveToken = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -119,8 +159,17 @@ export const verifyCustomerToken = (
     if (payload.type != PayloadType.CustomerType) {
       throw new BadRequestError('Unauthorized User');
     }
-    console.log(`payload :: ${payload.id}`)
+    var isUserExist = await Customer.findOne({
+      $and: [{ _id: payload.id }, { isActive: true, isDeletedAccount: false }],
+    });
+
+    if (!isUserExist) {
+      throw new BadRequestError(
+        'token/session you login is no more authorized'
+      );
+    }
     req.currentUser = payload;
+    console.log(`current user id ${payload.id}`);
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
       throw new BadRequestError(error.message);

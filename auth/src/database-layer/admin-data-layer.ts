@@ -354,9 +354,10 @@ export class AdminDatabase {
     const roleData = await AdminRoleMapping.find({
       roleId: req.params.id,
     }).populate('permissionId');
-    if (roleData) {
+    if (roleData === undefined || roleData.length == 0) {
+      throw new BadRequestError(`No Data Found for ${req.params.id}`);
+    } else {
       var role = await AdminRole.findById({ _id: req.params.id });
-
       var permissionsList: {}[] = [];
       await Promise.all(
         roleData.map(async (e: any) => {
@@ -369,14 +370,12 @@ export class AdminDatabase {
         roleName: role?.name,
         permissions: permissionsList,
       };
-    } else {
-      throw new BadRequestError(`No Data Found for #${req.params.roleId}`);
     }
   }
 
   static async getAdminRolesList(req: Request) {
     const list = await AdminRoleMapping.find().populate('permissionId');
-    if (list) {
+    if (list !== undefined && list.length > 0) {
       var roleIdArray: {}[] = [];
       var finalArray: {}[] = [];
 
@@ -411,11 +410,9 @@ export class AdminDatabase {
           }
         })
       );
-      return {
-        data: finalArray,
-      };
+      return finalArray;
     } else {
-      throw new BadRequestError(`No Data Found for #${req.params.roleId}`);
+      return [];
     }
   }
 
