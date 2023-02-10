@@ -416,8 +416,15 @@ export class AdminDatabase {
     }
   }
 
-  static async updateAdminRole(req: Request) {
+  static async updateAdminRole(req: any) {
     const roleId = req.body.roleId;
+    var isSuperAdmin = await Admin.findById(req.currentUser.id);
+    if (!isSuperAdmin) {
+      throw new BadRequestError(
+        'Permission denied! Only Superadmin can update the roles'
+      );
+    }
+
     var checkRoleExist = await AdminRole.findById(roleId);
     if (!checkRoleExist) {
       throw new BadRequestError("Role doesn't exist for this role id");
