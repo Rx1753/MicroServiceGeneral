@@ -24,7 +24,7 @@ export interface CityDoc extends mongoose.Document {
 
 const citySchema = new mongoose.Schema(
   {
-    cityName: { type: String, required: true, unique: true },
+    cityName: { type: String, required: true},
     stateId: { type: String, ref: 'State' },
     isActive: { type: Boolean, default: true },
   },

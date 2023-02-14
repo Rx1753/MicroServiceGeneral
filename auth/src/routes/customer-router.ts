@@ -1,137 +1,97 @@
 import express, { Request, Response, Router } from 'express';
-import { verifyCustomerToken, verifyToken } from '../middlewares/current-user';
+import { verifyCustomerActiveToken, verifyToken } from '../middlewares/current-user';
 import { validateRequest } from '@rx-projects/common';
 import { CustomerAuthValidation } from '../validations/customer-validation';
 import { CustomerDomain } from '../domain/customer-domain';
 
 const router = express.Router();
+var baseUrl = `/api/users/customer`;
 
 //sign up
 router.post(
-  '/api/users/customer/signup',
-  CustomerAuthValidation.signupValidation,
-  validateRequest,
-  CustomerDomain.signUp
+  `${baseUrl}/signup`,CustomerAuthValidation.signupValidation,validateRequest,CustomerDomain.signUp
 );
 
 //sign in
 router.post(
-  '/api/users/customer/signin',
-  CustomerAuthValidation.signInValidation,
-  validateRequest,
-  CustomerDomain.signIn
+  `${baseUrl}/signin`,CustomerAuthValidation.signInValidation,validateRequest,CustomerDomain.signIn
 );
 
 router.put(
-  '/api/users/customer/updateprofile/:id',
-  verifyCustomerToken,
-  CustomerAuthValidation.updateProfileValidation,
-  validateRequest,
+  `${baseUrl}/updateprofile/:id`,verifyCustomerActiveToken,CustomerAuthValidation.updateProfileValidation,validateRequest,
   CustomerDomain.updateProfile
 );
 
 router.post(
-  '/api/users/customer/changepassword',
-  verifyCustomerToken,
-  CustomerAuthValidation.changePasswordValidation,
-  validateRequest,
+  `${baseUrl}/changepassword`,verifyCustomerActiveToken,CustomerAuthValidation.changePasswordValidation,validateRequest,
   CustomerDomain.changePassword
 );
 
 router.post(
-  '/api/users/customer/forgotpassword/sendotp',
-  CustomerAuthValidation.forgotPasswordValidation,
-  validateRequest,
+  `${baseUrl}/forgotpassword/sendotp`,CustomerAuthValidation.forgotPasswordValidation,validateRequest,
   CustomerDomain.forgotPasswordSendOtp
 );
 
 router.post(
-  '/api/users/customer/forgotpassword/verifyotp',
-  CustomerAuthValidation.forgotPasswordVerificationValidation,
-  validateRequest,
+  `${baseUrl}/forgotpassword/verifyotp`,CustomerAuthValidation.forgotPasswordVerificationValidation,validateRequest,
   CustomerDomain.forgotPasswordVerifyOtp
 );
 
 router.delete(
-  '/api/users/customer/delete/:id',
-  verifyCustomerToken,
-  CustomerAuthValidation.deleteCustomer,
+  `${baseUrl}/delete/:id`,verifyCustomerActiveToken,CustomerAuthValidation.deleteCustomer,validateRequest,
   CustomerDomain.deleteCustomer
 );
 
 //isMfa active
 router.post(
-  '/api/users/customer/mfa/:id',
-  verifyCustomerToken,
-  CustomerAuthValidation.checkMFA,
-  validateRequest,
+  `${baseUrl}/mfa`,verifyCustomerActiveToken,CustomerAuthValidation.checkMFA,validateRequest,
   CustomerDomain.checkMFA
 );
 
 router.post(
-  '/api/users/customer/mfa/sendemail/:id',
-  verifyCustomerToken,
+  `${baseUrl}/mfa/sendemail`,verifyCustomerActiveToken,CustomerAuthValidation.sendEmailMFA,validateRequest,
   CustomerDomain.sendEmailMFA
 );
 
 router.post(
-  '/api/users/customer/mfa/sendsms/:id',
-  verifyCustomerToken,
+  `${baseUrl}/mfa/sendsms`,verifyCustomerActiveToken,CustomerAuthValidation.sendSmsMFA,validateRequest,
   CustomerDomain.sendSmsMFA
 );
 
 router.post(
-  '/api/users/customer/verifyemail',
-  verifyCustomerToken,
-  CustomerAuthValidation.verifyEmailValidation,
-  validateRequest,
+  `${baseUrl}/mfa/verifyemail`,verifyCustomerActiveToken,CustomerAuthValidation.verifyEmailValidation,validateRequest,
   CustomerDomain.verifyEmail
 );
 router.post(
-  '/api/users/customer/verifyphone',
-  verifyCustomerToken,
-  CustomerAuthValidation.verifyPhoneNumberValidation,
-  validateRequest,
+  `${baseUrl}/mfa/verifyphone`,verifyCustomerActiveToken,CustomerAuthValidation.verifyPhoneNumberValidation,validateRequest,
   CustomerDomain.verifyPhoneNumber
 );
 
 //customers list
-router.get('/api/users/customer/getcustomers', CustomerDomain.getCustomers);
+router.get(`${baseUrl}/getcustomers`, verifyToken, CustomerDomain.getCustomers);
 
 router.get(
-  '/api/users/customer/getlistbystatus',
-  verifyToken,
-  CustomerAuthValidation.getListByStatusValidation,
-  validateRequest,
+  `${baseUrl}/getlistbystatus`,verifyToken,CustomerAuthValidation.getListByStatusValidation,validateRequest,
   CustomerDomain.getCustomerByStatus
 );
 
 router.get(
-  '/api/users/customer/getlistbyname',
-  verifyToken,
-  CustomerAuthValidation.getListByNameValidation,
-  validateRequest,
+  `${baseUrl}/getlistbyname`,verifyToken,CustomerAuthValidation.getListByNameValidation,validateRequest,
   CustomerDomain.getCustomerByName
 );
 
 router.get(
-  '/api/users/customer/deletedcustomers',
-  verifyToken,
-  CustomerDomain.getListOfDeletedAccounts
+  `${baseUrl}/deletedcustomers`,verifyToken,CustomerDomain.getListOfDeletedAccounts
 );
 
 router.get(
-  '/api/users/customer/currentuser',
-  verifyCustomerToken,
-  CustomerDomain.currentLoginUser
+  `${baseUrl}/currentuser`,verifyCustomerActiveToken,CustomerDomain.currentLoginUser
 );
 
 router.get(
-  '/api/users/customer/refreshtoken',
-  verifyCustomerToken,
-  CustomerDomain.getRefreshToken
+  `${baseUrl}/refreshtoken`,verifyCustomerActiveToken,CustomerDomain.getRefreshToken
 );
 
-router.post('/api/users/customer/signout', CustomerDomain.signOut);
+router.post(`${baseUrl}/signout`, verifyCustomerActiveToken, CustomerDomain.signOut);
 
 export { router as customerRouter };

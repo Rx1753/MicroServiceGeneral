@@ -1,4 +1,5 @@
-import { body, oneOf, query } from 'express-validator';
+import { body, oneOf, query, param } from 'express-validator';
+import { Common } from '../services/common';
 
 export class CountryValidation {
   static countryCreateValidation = [
@@ -8,11 +9,20 @@ export class CountryValidation {
       .withMessage('countryName is required'),
   ];
   static countryUpdateValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
     body('countryName')
       .trim()
       .notEmpty()
       .withMessage('countryName is required'),
     body('isActive').isBoolean().withMessage('isActive is required'),
+  ];
+
+  static countryDeleteValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
   ];
 
   static getListByStatusValidation = [

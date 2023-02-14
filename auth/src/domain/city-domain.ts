@@ -1,42 +1,38 @@
-import { BadRequestError } from '@rx-projects/common';
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import { CityDatabaseLayer } from '../database-layer/city-data-layer';
+import { ResponseModel } from '../services/response-model';
 
 export class CityDomain {
+
   static async createCity(req: Request, res: Response) {
     const data = await CityDatabaseLayer.createCity(req);
-    res.status(201).send({ msg: 'City added successfully', data: data });
+    res.status(201).send(ResponseModel.success(data, `City added`));
   }
+
   static async updateCity(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Invalid param id');
-    }
     await CityDatabaseLayer.updateCity(req, req.params.id);
     res
-      .status(201)
-      .send({ msg: 'City updated successfully', id: req.params.id });
+      .status(200)
+      .send(ResponseModel.success({id: req.params.id}, `City updated successfully`));
   }
 
   static async deleteCity(req: Request, res: Response) {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      throw new BadRequestError('Invalid param id');
-    }
     await CityDatabaseLayer.deleteCity(req.params.id);
-    res.status(201).send({ deleted: true });
+    res.status(200).send(ResponseModel.success({deleted: true}, `City deleted`));
   }
 
   static async getCityList(req: Request, res: Response) {
-    const State = await CityDatabaseLayer.getCityList(req);
-    res.status(201).send(State);
+    const list = await CityDatabaseLayer.getCityList(req);
+    res.status(200).send(ResponseModel.success(list));
   }
 
   static async getListBystatus(req: Request, res: Response) {
-    const State = await CityDatabaseLayer.getListBystatus(req);
-    res.status(201).send(State);
+    const list = await CityDatabaseLayer.getListBystatus(req);
+    res.status(200).send(ResponseModel.success(list));
   }
+  
   static async getCityByName(req: Request, res: Response) {
-    const State = await CityDatabaseLayer.getCityByName(req);
-    res.status(201).send(State);
+    const list = await CityDatabaseLayer.getCityByName(req);
+    res.status(200).send(ResponseModel.success(list));
   }
 }

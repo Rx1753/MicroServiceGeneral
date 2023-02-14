@@ -1,6 +1,5 @@
 import { body, oneOf, check, query, param } from 'express-validator';
-import { BadRequestError } from '@rx-projects/common';
-import mongoose from 'mongoose';
+import { Common } from '../services/common';
 
 export class CustomerAddressValidation {
   static addAddressValidations = [
@@ -79,15 +78,9 @@ export class CustomerAddressValidation {
   ];
 
   static updateAddressValidations = [
-    param('id')
-      .notEmpty()
-      .withMessage('param id is required')
-      .custom((value, { req }) => {
-        if (!mongoose.isValidObjectId(req.params?.id)) {
-          throw new BadRequestError('invalid param id');
-        }
-        return true;
-      }),
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
     body('address.phoneNumber')
       .trim()
       .matches(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im)
@@ -97,7 +90,7 @@ export class CustomerAddressValidation {
       .trim()
       .notEmpty()
       .withMessage('Please provide a addressType.'),
-    body('address.address.isDefault')
+    body('address.isDefault')
       .isBoolean()
       .withMessage('isDefault is required'),
     body('address.addressLine1')
@@ -165,26 +158,20 @@ export class CustomerAddressValidation {
   ];
 
   static deleteAddressValidations = [
-    param('id')
-      .notEmpty()
-      .withMessage('param id is required')
-      .custom((value, { req }) => {
-        if (!mongoose.isValidObjectId(req.params?.id)) {
-          throw new BadRequestError('invalid param id');
-        }
-        return true;
-      }),
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
   ];
 
   static customerAddressValidations = [
-    param('id')
-      .notEmpty()
-      .withMessage('param id is required')
-      .custom((value, { req }) => {
-        if (!mongoose.isValidObjectId(req.params?.id)) {
-          throw new BadRequestError('invalid param id');
-        }
-        return true;
-      }),
+    param('customerId').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.customerId,'invalid customerId');
+    }),
+  ];
+
+  static findByIdAddressValidations = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
   ];
 }

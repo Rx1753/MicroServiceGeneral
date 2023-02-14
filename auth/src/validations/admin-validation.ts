@@ -1,5 +1,7 @@
 import { BadRequestError } from '@rx-projects/common';
-import { body, check, oneOf, query } from 'express-validator';
+import { body, check, oneOf, query, param } from 'express-validator';
+import { PermissionNameEnum } from '../models/admin-permissions';
+import { Common } from '../services/common';
 
 export class Validation {
   static addAdminValidation = [
@@ -32,6 +34,16 @@ export class Validation {
       }
       return true;
     }),
+    body('roleId')
+      .trim()
+      .notEmpty()
+      .withMessage('Please provide a roleId.')
+      .custom((value, { req }) => {
+        return Common.checkIsValidMongoId(
+          req.body?.roleId,
+          'invalid roleId type'
+        );
+      }),
   ];
 
   static signInValidation = [
@@ -66,7 +78,11 @@ export class Validation {
   ];
 
   static addPermissionsValidation = [
-    body('tableName').notEmpty().withMessage('Please provide tableName'),
+    body('tableName')
+      .notEmpty()
+      .withMessage('Please provide tableName')
+      .isIn([PermissionNameEnum[PermissionNameEnum.adminPanelPermissions]])
+      .withMessage('Please provide valid name'),
     body('isRead').isBoolean().withMessage('isRead is required'),
     body('isUpdate').isBoolean().withMessage('isUpdate is required'),
     body('isDelete').isBoolean().withMessage('isDelete is required'),
@@ -132,11 +148,28 @@ export class Validation {
     body('roleId').notEmpty().withMessage('pls write RoleId of the admin'),
   ];
 
+  static getSingleAdminDetailValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
+  ];
+  static getAdminRoleByIdValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
+  ];
+
   static getListByStatusValidation = [
     query('isActive')
       .isBoolean()
       .withMessage('isActive value is required which is bool'),
     //query('isSuperAdmin').isBoolean().withMessage('isSuperAdmin value is required which is bool'),
+  ];
+
+  static updateAdminStatusValidation = [
+    param('id').custom((value, { req }) => {
+      return Common.checkIsValidMongoId(req.params?.id);
+    }),
   ];
 
   static getAdminListValidation = [
@@ -154,5 +187,18 @@ export class Validation {
       .trim()
       .isLength({ min: 8, max: 20 })
       .withMessage('password must be between 4 and 20 characters'),
+  ];
+
+  static changePasswordValidation = [
+    body('oldPassword')
+      .trim()
+      .isLength({ min: 7, max: 20 })
+      .withMessage('password must be between 4 to 20 characters'),
+    body('newPassword')
+      .trim()
+      .isLength({ min: 8, max: 20 })
+      .withMessage('newPassword must be between 4 to 20 characters')
+      .custom((value, { req }) => value !== req.body.oldPassword)
+      .withMessage('oldPassword & newPassword should not match'),
   ];
 }

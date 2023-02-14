@@ -13,6 +13,7 @@ export class CityDatabaseLayer {
       if (stateCheck) {
         const isCityExist = await City.findOne({
           cityName: cityName,
+          stateId: stateId,
         });
 
         if (isCityExist) {

@@ -13,6 +13,7 @@ export class StateDatabaseLayer {
       if (countryCheck) {
         const isStateExist = await State.findOne({
           stateName: stateName,
+          countryId: countryId,
         });
 
         if (isStateExist) {
@@ -89,7 +90,7 @@ export class StateDatabaseLayer {
   }
 
   static async getStateByName(req: any) {
-    console.log(`stateName :: ${req.query?.stateName}`)
+    console.log(`stateName :: ${req.query?.stateName}`);
     const data = await State.find({
       isActive: true,
       stateName: { $regex: req.query?.stateName, $options: 'i' },
