@@ -4,6 +4,7 @@ import { Password } from '../services/password';
 import {
   AdminPermissionsAttrs,
   AdminPermissions,
+  PermissionNameEnum,
 } from '../models/admin-permissions';
 import { Request } from 'express';
 import { AdminRoleMapping } from '../models/admin-role-mapping';
@@ -35,16 +36,13 @@ export class AdminDatabase {
     return permission;
   }
 
-  static async createRole(req: Request) {
-    const { roleName, permissionId } = req.body;
-
+  static async createRole(roleName: string, permissionId: any) {
     const isRoleExists: any = await AdminRole.findOne({
       name: roleName,
     });
     if (isRoleExists) {
       throw new BadRequestError('Role already defined');
     }
-
     await Promise.all(
       permissionId.map(async (e: any) => {
         const permissionCheck = await AdminPermissions.findById(e);
@@ -53,10 +51,8 @@ export class AdminDatabase {
         }
       })
     );
-
     const data = AdminRole.build({ name: roleName });
     await data.save();
-
     await Promise.all(
       permissionId.map(async (e: any) => {
         const roleMappingData = AdminRoleMapping.build({
@@ -71,12 +67,10 @@ export class AdminDatabase {
 
   static async updateRolePermissions(req: Request) {
     const { roleId, permissionId } = req.body;
-
     const isRoleExists: any = await AdminRole.findById(roleId);
     if (!isRoleExists) {
-      throw new BadRequestError('Create role to update');
+      throw new BadRequestError("Role doesn't exists to update");
     }
-
     // Check permission exist or not in db
     await Promise.all(
       permissionId.map(async (e: any) => {
@@ -86,13 +80,11 @@ export class AdminDatabase {
         }
       })
     );
-
     var getAllPermissionsData = await AdminRoleMapping.find({ roleId: roleId });
     if (getAllPermissionsData != null) {
       console.log(`Delete permissions for Role Id :: ${roleId}`);
       await AdminRoleMapping.deleteMany({ roleId: roleId });
     }
-
     // Update new permissions for Roles
     await Promise.all(
       permissionId.map(async (e: any) => {
@@ -103,7 +95,6 @@ export class AdminDatabase {
         await roleMappingData.save();
       })
     );
-
     return isRoleExists;
   }
 
@@ -125,6 +116,13 @@ export class AdminDatabase {
     return existingPhone;
   }
 
+  static async isAdminExist(id: String) {
+    var isUserExist = await Admin.findOne({
+      $and: [{ _id: id }, { isActive: true }],
+    });
+    return isUserExist;
+  }
+
   static async checkPassword(existingPassword: string, password: string) {
     return await Password.compare(existingPassword, password);
   }
@@ -132,7 +130,7 @@ export class AdminDatabase {
   static async addAdminUser(req: any) {
     try {
       const adminDataUser = await Admin.findById({ _id: req.currentUser.id });
-      if (adminDataUser?.isSuperAdmin == true) {
+      if (adminDataUser?.isSuperAdmin) {
         return await this.addUserToAdminTable(req);
       } else {
         throw new BadRequestError(
@@ -146,32 +144,16 @@ export class AdminDatabase {
 
   static async addNewUser(req: any) {
     try {
-      const adminDataUser = await Admin.findById({ _id: req.currentUser.id });
-      if (adminDataUser) {
-        const currentUserRole = await AdminRole.findById(adminDataUser.roleId);
-        const roleCheckForNewUser = await AdminRole.findById(req.body.roleId);
-
-        console.log(`currentUser :: Role name :: ${currentUserRole?.name}`);
-        console.log(`addNewUser  :: Role name :: ${roleCheckForNewUser?.name}`);
-        if (
-          roleCheckForNewUser?.name == 'SuperAdmin' ||
-          roleCheckForNewUser?.name == 'Admin'
-        ) {
-          throw new BadRequestError(
-            'Permission denied to add role as an Admin/SuperAdmin'
-          );
-        } else if (
-          adminDataUser.isSuperAdmin ||
-          currentUserRole?.name == 'Admin'
-        ) {
-          return await this.addUserToAdminTable(req);
-        } else {
-          throw new BadRequestError(
-            'Permission denied! Only Admin/SuperAdmin can add new user'
-          );
-        }
+      var isCreatePermissionAllow = await this.isCreatePermissionAllow(
+        req.currentUser.id
+      );
+      if (isCreatePermissionAllow) {
+        console.log(`currentUser :: Role name ::-> ${req.currentUser.id}`);
+        return await this.addUserToAdminTable(req);
       } else {
-        throw new BadRequestError('Admin User not found');
+        throw new BadRequestError(
+          'Permission denied! You have no rights to create a new user'
+        );
       }
     } catch (error: any) {
       throw new BadRequestError(error.message);
@@ -193,10 +175,8 @@ export class AdminDatabase {
     if (!roleCheck) {
       throw new BadRequestError('Invalid role id');
     }
-
     var user: AdminAttrs;
     const hashPassword = await Password.toHash(password);
-
     user = {
       userName: userName,
       password: hashPassword,
@@ -234,10 +214,8 @@ export class AdminDatabase {
       user.countryCode = countryCode;
       user.email = email;
     }
-
     //Role permission logic
     const roleDataArr: string[] = [];
-
     rolesArray.forEach((e: any) => {
       if (!roleDataArr.includes(e.tableName)) {
         roleDataArr.push(e.tableName);
@@ -245,9 +223,7 @@ export class AdminDatabase {
         throw new BadRequestError('Repeating table is not possible');
       }
     });
-
     var permissionRoleId: { _id: string }[] = [];
-
     await Promise.all(
       rolesArray.map(async (e: any) => {
         const permissionRoleMap = await this.checkRoleMapping(
@@ -257,7 +233,6 @@ export class AdminDatabase {
           e.isDelete,
           e.isRead
         );
-
         permissionRoleId.push(permissionRoleMap);
         const roleMappingData = AdminRoleMapping.build({
           roleId: roleId,
@@ -266,9 +241,7 @@ export class AdminDatabase {
         await roleMappingData.save();
       })
     );
-
     console.log(`permissionRoleId :: ${JSON.stringify(permissionRoleId)}`);
-
     const adminData = Admin.build(user);
     adminData.createdBy = req.currentUser.id;
     await adminData.save();
@@ -351,69 +324,107 @@ export class AdminDatabase {
   }
 
   static async getAdminRoles(req: Request) {
-    const roleData = await AdminRoleMapping.find({
-      roleId: req.params.id,
-    }).populate('permissionId');
-    if (roleData === undefined || roleData.length == 0) {
-      throw new BadRequestError(`No Data Found for ${req.params.id}`);
-    } else {
-      var role = await AdminRole.findById({ _id: req.params.id });
-      var permissionsList: {}[] = [];
-      await Promise.all(
-        roleData.map(async (e: any) => {
-          permissionsList.push(e.permissionId);
-        })
-      );
-
-      return {
-        roleId: req.params.id,
-        roleName: role?.name,
-        permissions: permissionsList,
-      };
-    }
+    console.log(`getAdminRoles ------>>>`);
+    const data = await AdminRole.aggregate([
+      {
+        $match: {
+          $expr: { $eq: ['$_id', { $toObjectId: `${req.params.id}` }] },
+        },
+      },
+      { $addFields: { rId: { $toString: '$_id' } } },
+      {
+        $lookup: {
+          from: 'adminrolemappings',
+          localField: 'rId',
+          foreignField: 'roleId',
+          as: 'permissions',
+        },
+      },
+      {
+        $unwind: {
+          path: '$permissions',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          permissionObjId: { $toObjectId: '$permissions.permissionId' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'adminpermissions',
+          localField: 'permissionObjId',
+          foreignField: '_id',
+          as: 'permissions.data',
+        },
+      },
+      {
+        $unwind: {
+          path: '$permissions.data',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          roleName: { $first: '$name' },
+          createdAt: { $first: '$createdAt' },
+          updatedAt: { $first: '$updatedAt' },
+          permissions: { $push: '$permissions.data' },
+        },
+      },
+    ]);
+    return data.length > 0 ? data[0] : [];
   }
 
-  static async getAdminRolesList(req: Request) {
-    const list = await AdminRoleMapping.find().populate('permissionId');
-    if (list !== undefined && list.length > 0) {
-      var roleIdArray: {}[] = [];
-      var finalArray: {}[] = [];
-
-      await Promise.all(
-        list.map(async (e: any) => {
-          if (!roleIdArray.includes(e.roleId)) {
-            roleIdArray.push(e.roleId);
-            const roleData = await AdminRoleMapping.find({
-              roleId: e.roleId,
-            }).populate('permissionId');
-
-            if (roleData) {
-              var role = await AdminRole.findById({ _id: e.roleId });
-              var permissionsList: {}[] = [];
-              await Promise.all(
-                roleData.map(async (e: any) => {
-                  permissionsList.push(e.permissionId);
-                })
-              );
-
-              finalArray.push({
-                roleId: e.roleId,
-                roleName: role?.name,
-                createdAt: role?.createdAt,
-                updatedAt: role?.updatedAt,
-                permissions: permissionsList,
-              });
-              console.log(
-                `ROLE ID :: ${e.roleId} :: Permissions :: ${permissionsList.length}`
-              );
-            }
-          }
-        })
-      );
-      return finalArray;
-    } else {
-      return [];
-    }
+  static async getAdminRolesList() {
+    const data = await AdminRole.aggregate([
+      { $addFields: { rId: { $toString: '$_id' } } },
+      {
+        $lookup: {
+          from: 'adminrolemappings',
+          localField: 'rId',
+          foreignField: 'roleId',
+          as: 'permissions',
+        },
+      },
+      {
+        $unwind: {
+          path: '$permissions',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          permissionObjId: { $toObjectId: '$permissions.permissionId' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'adminpermissions',
+          localField: 'permissionObjId',
+          foreignField: '_id',
+          as: 'permissions.data',
+        },
+      },
+      {
+        $unwind: {
+          path: '$permissions.data',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          roleName: { $first: '$name' },
+          createdAt: { $first: '$createdAt' },
+          updatedAt: { $first: '$updatedAt' },
+          permissions: { $push: '$permissions.data' },
+        },
+      },
+    ]);
+    return data;
   }
 
   static async updateAdminRole(req: any) {
@@ -424,14 +435,11 @@ export class AdminDatabase {
         'Permission denied! Only Superadmin can update the roles'
       );
     }
-
     var checkRoleExist = await AdminRole.findById(roleId);
     if (!checkRoleExist) {
       throw new BadRequestError("Role doesn't exist for this role id");
     }
-
     await Admin.findByIdAndUpdate(req.body.id, { roleId: roleId });
-
     const adminData = await Admin.findById(req.body.id);
     return adminData;
   }
@@ -472,6 +480,50 @@ export class AdminDatabase {
     return refreshToken;
   }
 
+  static async getPermissions(req: any) {
+    var result;
+    if (req.query?.pageNo == null && req.query?.limit == null) {
+      //Without pagination
+      const totalData = await AdminPermissions.find();
+      result = {
+        totalRecords: totalData.length,
+        page: null,
+        nextPage: null,
+        result: totalData,
+      };
+    } else {
+      //Pagination
+      if (req.query?.pageNo == null || req.query?.limit == null) {
+        throw new BadRequestError('pageNo & limit is required as int');
+      } else if (
+        (req.query?.limit != null && isNaN(req.query?.limit)) ||
+        (req.query?.pageNo != null && isNaN(req.query?.pageNo))
+      ) {
+        throw new BadRequestError(
+          'Invalid data type! Only int value is allowed'
+        );
+      }
+      var pageNo = parseInt(req.query.pageNo);
+      var limit = parseInt(req.query.limit);
+      var skip = pageNo * limit;
+      const totalData = await AdminPermissions.find();
+      console.log(
+        `pageNo : ${pageNo} , limit : ${limit} , skip :: ${skip}, totalCount : ${totalData.length} `
+      );
+      var data = await AdminPermissions.find().skip(skip).limit(limit);
+
+      console.log(`pageNo : ${pageNo}, nextPage : ${pageNo + 1}`);
+
+      result = {
+        totalRecords: totalData.length,
+        page: pageNo,
+        nextPage: pageNo + 1,
+        result: data,
+      };
+    }
+    return result;
+  }
+
   static async getAdminList(req: any) {
     var result;
     if (req.query?.pageNo == null && req.query?.limit == null) {
@@ -498,11 +550,9 @@ export class AdminDatabase {
           'Invalid data type! Only int value is allowed'
         );
       }
-
       var pageNo = parseInt(req.query.pageNo);
       var limit = parseInt(req.query.limit);
       var skip = pageNo * limit;
-
       const totalData = await Admin.find({
         isActive: true,
         isSuperAdmin: false,
@@ -542,7 +592,6 @@ export class AdminDatabase {
         isActive: req.query.isActive,
       });
     }
-
     return adminData;
   }
 
@@ -606,19 +655,16 @@ export class AdminDatabase {
         //Generate OTP
         const code = CodeGenerator.getOtp();
         const expirationTime = Common.addSecondsToDate(60);
-
         var isOtpExists = await OtpCode.findOne({
           type: 'email',
           email: email,
         });
-
         //Send email than save it to db
         var htmlTemplate = HtmlTemplate.sendOtpOnForgotPassword(
           emailData.userName,
           code
         );
         await MailService.mailTrigger(email, 'Forgot Password ', htmlTemplate);
-
         //Create OTP instance in DB
         if (isOtpExists) {
           await OtpCode.findByIdAndUpdate(isOtpExists.id, {
@@ -638,7 +684,6 @@ export class AdminDatabase {
           });
           await createVerificationCode.save();
         }
-
         console.log(`Email trigged and save it to db :: ${code}`);
         return true;
       }
@@ -670,24 +715,81 @@ export class AdminDatabase {
 
     if (newData) {
       console.log('password updated');
-      const accessToken = await AdminDatabase.createAccessToken(
-        newData.id,
-        newData.email,
-        newData.phoneNumber,
-        newData.countryCode
-      );
-      const newRefreshToken = await AdminDatabase.updateRefreshToken(
-        newData.id,
-        newData.email,
-        newData.phoneNumber,
-        newData.countryCode
-      );
       //delete otp entry for the forgot password
       await OtpCode.findByIdAndDelete(otpCheck.id);
-      req.session = { jwt: accessToken, refreshToken: newRefreshToken };
-      return { accessToken: accessToken, refreshToken: newRefreshToken };
+      req.session = null;
+      return { message: 'Password updated' };
     } else {
       throw new BadRequestError('Something went wrong');
+    }
+  }
+
+  static async changePassword(req: any) {
+    const { oldPassword, newPassword } = req.body;
+    const checkUser = await AdminDatabase.isAdminExist(req.currentUser?.id);
+    if (!checkUser) {
+      throw new BadRequestError('user does not exist');
+    }
+    const verifyPassword = await Password.compare(
+      checkUser.password,
+      oldPassword
+    );
+    if (!verifyPassword) {
+      throw new BadRequestError('invalid old password');
+    }
+    const newHashPassword = await Password.toHash(newPassword);
+    const refreshToken = await AdminDatabase.updateRefreshToken(
+      checkUser.id,
+      checkUser.email,
+      checkUser.phoneNumber,
+      checkUser.countryCode
+    );
+    const accessToken = await AdminDatabase.createAccessToken(
+      checkUser.id,
+      checkUser.email,
+      checkUser.phoneNumber,
+      checkUser.countryCode
+    );
+    await Admin.findByIdAndUpdate(checkUser.id, {
+      password: newHashPassword,
+    });
+    return {
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    };
+  }
+
+  static async isCreatePermissionAllow(currentUserId: string) {
+    const currentUserData = await Admin.findById({ _id: currentUserId });
+    var currentUserRolePermissions = await AdminRoleMapping.aggregate([
+      { $match: { roleId: currentUserData?.roleId } },
+      { $addFields: { permissionObjId: { $toObjectId: '$permissionId' } } },
+      {
+        $lookup: {
+          from: 'adminpermissions',
+          localField: 'permissionObjId',
+          foreignField: '_id',
+          as: 'permissionsData',
+        },
+      },
+      {
+        $unwind: '$permissionsData',
+      },
+      {
+        $match: {
+          'permissionsData.tableName':
+            PermissionNameEnum[PermissionNameEnum.adminPanelPermissions],
+          'permissionsData.isCreate': true,
+        },
+      },
+    ]);
+    if (
+      currentUserRolePermissions != null &&
+      currentUserRolePermissions.length > 0
+    ) {
+      return true;
+    } else {
+      return null;
     }
   }
 }

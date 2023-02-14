@@ -1,5 +1,6 @@
 import { BadRequestError } from '@rx-projects/common';
 import { body, check, oneOf, query, param } from 'express-validator';
+import { PermissionNameEnum } from '../models/admin-permissions';
 import { Common } from '../services/common';
 
 export class Validation {
@@ -38,7 +39,10 @@ export class Validation {
       .notEmpty()
       .withMessage('Please provide a roleId.')
       .custom((value, { req }) => {
-        return Common.checkIsValidMongoId(req.body?.roleId,'invalid roleId type');
+        return Common.checkIsValidMongoId(
+          req.body?.roleId,
+          'invalid roleId type'
+        );
       }),
   ];
 
@@ -74,7 +78,11 @@ export class Validation {
   ];
 
   static addPermissionsValidation = [
-    body('tableName').notEmpty().withMessage('Please provide tableName'),
+    body('tableName')
+      .notEmpty()
+      .withMessage('Please provide tableName')
+      .isIn([PermissionNameEnum[PermissionNameEnum.adminPanelPermissions]])
+      .withMessage('Please provide valid name'),
     body('isRead').isBoolean().withMessage('isRead is required'),
     body('isUpdate').isBoolean().withMessage('isUpdate is required'),
     body('isDelete').isBoolean().withMessage('isDelete is required'),
@@ -179,5 +187,18 @@ export class Validation {
       .trim()
       .isLength({ min: 8, max: 20 })
       .withMessage('password must be between 4 and 20 characters'),
+  ];
+
+  static changePasswordValidation = [
+    body('oldPassword')
+      .trim()
+      .isLength({ min: 7, max: 20 })
+      .withMessage('password must be between 4 to 20 characters'),
+    body('newPassword')
+      .trim()
+      .isLength({ min: 8, max: 20 })
+      .withMessage('newPassword must be between 4 to 20 characters')
+      .custom((value, { req }) => value !== req.body.oldPassword)
+      .withMessage('oldPassword & newPassword should not match'),
   ];
 }

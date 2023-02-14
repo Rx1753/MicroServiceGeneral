@@ -8,24 +8,21 @@ export class AdminDomain {
 
   static async addPermissions(req: Request, res: Response) {
     const data: AdminPermissionsAttrs = req.body;
-    var isPermissionExistWithTN = await AdminDatabase.checkPermissionExist(
-      data
-    );
+    var isPermissionExistWithTN = await AdminDatabase.checkPermissionExist(data);
     if (isPermissionExistWithTN) {
       throw new BadRequestError('permission already exist for this table');
     }
     var isPermissionAdded = await AdminDatabase.addPermission(data);
     if (isPermissionAdded) {
-      res
-        .status(201)
-        .send(ResponseModel.success(isPermissionAdded, `Permission added`));
+      res.status(201).send(ResponseModel.success(isPermissionAdded, `Permission added`));
     } else {
       throw new BadRequestError('permission not found');
     }
   }
 
   static async createRole(req: Request, res: Response) {
-    var data = await AdminDatabase.createRole(req);
+    const { roleName, permissionId } = req.body;
+    var data = await AdminDatabase.createRole(roleName, permissionId);
     res.status(201).send(ResponseModel.success(data, `Role created`));
   }
 
@@ -175,7 +172,7 @@ export class AdminDomain {
   }
 
   static async getAdminRolesList(req: Request, res: Response) {
-    var resData = await AdminDatabase.getAdminRolesList(req);
+    var resData = await AdminDatabase.getAdminRolesList();
     res.status(200).send(ResponseModel.success(resData, `Admin roles list fetched`));
   }
 
@@ -184,15 +181,20 @@ export class AdminDomain {
     res.status(200).send(ResponseModel.success(resData, `Admin role updated`));
   }
 
+  static async getPermissions(req: Request, res: Response) {
+    const resData = await AdminDatabase.getPermissions(req);
+    res.status(200).send(ResponseModel.success(resData, `Permissions fetched`));
+  }
+
   static async getAdminList(req: Request, res: Response) {
     const resData = await AdminDatabase.getAdminList(req);
     res.status(200).send(ResponseModel.success(resData, `Admin list fetched`));
   }
+
   static async getAdminByStatus(req: Request, res: Response) {
     const resData = await AdminDatabase.getAdminByStatus(req);
     res.status(200).send(ResponseModel.success(resData, `Admin list fetched by status`));
   }
-
 
   static async getAdminByName(req: Request, res: Response) {
     var resData = await AdminDatabase.getAdminByName(req);
@@ -208,6 +210,12 @@ export class AdminDomain {
 
   static async forgotPasswordVerification(req: Request, res: Response) {
     const data = await AdminDatabase.forgotPasswordVerification(req);
+    res.status(200).send(ResponseModel.success(data, `Password updated successfully`));
+  }
+
+
+  static async changePassword(req: Request, res: Response) {
+    const data = await AdminDatabase.changePassword(req);
     res.status(200).send(ResponseModel.success(data, `Password updated successfully`));
   }
 }

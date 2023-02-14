@@ -1,4 +1,7 @@
 import mongoose from 'mongoose';
+export enum PermissionNameEnum {
+  adminPanelPermissions = 'adminPanelPermissions',
+}
 
 export interface AdminPermissionsAttrs {
   tableName: string;
@@ -26,6 +29,7 @@ const adminPermissionSchema = new mongoose.Schema(
     tableName: {
       type: String,
       required: true,
+      enum: [PermissionNameEnum[PermissionNameEnum.adminPanelPermissions]],
     },
     isCreate: { type: Boolean, required: true, default: true },
     isDelete: { type: Boolean, required: true, default: true },

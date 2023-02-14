@@ -425,22 +425,10 @@ export class CustomerDataBaseLayer {
     });
     if (newData) {
       console.log('password updated');
-      const accessToken = await CustomerDataBaseLayer.createAccessToken(
-        newData.id,
-        newData.email,
-        newData.phoneNumber,
-        newData.countryCode
-      );
-      const newRefreshToken = await CustomerDataBaseLayer.updateRefreshToken(
-        newData.id,
-        newData.email,
-        newData.phoneNumber,
-        newData.countryCode
-      );
       //delete otp entry for the forgot password
       await OtpCode.findByIdAndDelete(otpCheck.id);
-      req.session = { jwt: accessToken, refreshToken: newRefreshToken };
-      return { accessToken: accessToken, refreshToken: newRefreshToken };
+      req.session = null;
+      return { message : 'Password updated successfully, Please login' };
     } else {
       throw new BadRequestError('Something went wrong.');
     }

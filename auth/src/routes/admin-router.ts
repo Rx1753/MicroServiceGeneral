@@ -68,17 +68,25 @@ router.get(
 );
 
 // All list
+// permissions
+router.get(
+  `${baseUrl}/getpermissions`,verifyAdminToken,
+  AdminDomain.getPermissions
+);
+
 router.get(
   `${baseUrl}/getadmins`,verifyAdminToken,validateRequest,
   AdminDomain.getAdminList
 );
-router.get(
-  `${baseUrl}/getlistbystatus`,verifyAdminToken,Validation.getListByStatusValidation,validateRequest,
-  AdminDomain.getAdminByStatus
-);
+
 router.get(
   `${baseUrl}/getadminroles`,verifyAdminToken,
   AdminDomain.getAdminRolesList
+);
+
+router.get(
+  `${baseUrl}/getlistbystatus`,verifyAdminToken,Validation.getListByStatusValidation,validateRequest,
+  AdminDomain.getAdminByStatus
 );
 
 // Search
@@ -96,6 +104,12 @@ router.post(
 router.post(
   `${baseUrl}/forgotpassword/verifyotp`,verifyAdminToken,Validation.forgotPasswordVerificationValidation,validateRequest,
   AdminDomain.forgotPasswordVerification
+);
+
+//change password
+router.post(
+  `${baseUrl}/changepassword`,verifyAdminToken,Validation.changePasswordValidation,validateRequest,
+  AdminDomain.changePassword
 );
 
 // router.post(`${baseUrl}/sendemail`, async (req: any, res: any) => {
