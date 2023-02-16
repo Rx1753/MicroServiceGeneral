@@ -28,12 +28,11 @@ app.use('/api/authswagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 //Router
 app.use('/api/users/admin', adminAuthRouter);
-//app.use('/api/users/customer', customerRouter);
-//app.use('/api/users/customer/address', customerAddressRouter);
-//app.use('/api/users/country', countryRouter);
-//app.use('/api/users/state', stateRouter);
-//app.use('/api/users/city', cityRouter);
-
+app.use('/api/users/customer', customerRouter);
+app.use('/api/users/customer/address', customerAddressRouter);
+app.use('/api/users/country', countryRouter);
+app.use('/api/users/state', stateRouter);
+app.use('/api/users/city', cityRouter);
 
 app.all('*', async () => {
   throw new NotFoundError();

@@ -8,6 +8,12 @@ export class AdminDomain {
 
   //On check of permission allow to add permissions
   static async addPermissions(req: any, res: Response) {
+    var isSuperAdminOrAdmin = await AdminDatabase.isSuperAdminOrAdmin(req.currentUser.id);
+    if (!isSuperAdminOrAdmin) {
+      throw new BadRequestError(
+        'Permission Denied! Only super admin/admin can add permissions'
+      );
+    }
     const data: AdminPermissionsAttrs = req.body;
     var isPermissionExistWithTN = await AdminDatabase.checkPermissionExist(data);
     if (isPermissionExistWithTN) {
@@ -24,18 +30,18 @@ export class AdminDomain {
   //On check of permission allow to create role
   static async createRole(req: any, res: Response) {
     const { roleName, permissionId } = req.body;
-    var data = await AdminDatabase.createRole(roleName, permissionId);
+    var data = await AdminDatabase.createRole(roleName, permissionId,req.currentUser.id);
     res.status(201).send(ResponseModel.success(data, `Role created`));
   }
 
   //On check of permission allow to update role
   static async updateRolePermissions(req: any, res: Response) {
-    var data = await AdminDatabase.updateRolePermissions(req);
+    var data = await AdminDatabase.updateRolePermissions(req,req.currentUser.id);
     res.status(200).send(ResponseModel.success(data, `Role updated`));
   }
 
   //Only Super admin can update the status of active/inactive admins
-  static async statusUpdateForAdmin(req: Request, res: Response) {
+  static async statusUpdateForAdmin(req: any, res: Response) {
     var resData = await AdminDatabase.statusUpdateForAdmin(req);
     res.status(200).send(ResponseModel.success(resData, `updated admin status`));
   }
@@ -57,12 +63,12 @@ export class AdminDomain {
     }
 
     if (!isEmailExist && !(phoneNumber !== null && phoneNumber !== undefined)) {
-      throw new BadRequestError('invalid email');
+      throw new BadRequestError('invalid email or doesn\'t exists');
     } else if (
       !isPhoneNumberExist &&
       !(email !== null && email !== undefined)
     ) {
-      throw new BadRequestError('invalid phoneNumber');
+      throw new BadRequestError('invalid phoneNumber or doesn\'t exists');
     }
     const passwordMatch = await AdminDatabase.checkPassword(
       isEmailExist ? isEmailExist.password : isPhoneNumberExist.password,
@@ -192,8 +198,13 @@ export class AdminDomain {
   }
 
   static async getAdminList(req: Request, res: Response) {
-    const resData = await AdminDatabase.getAdminList(req);
+    const resData = await AdminDatabase.getAdminList(req,false);// fetch only admin list
     res.status(200).send(ResponseModel.success(resData, `Admin list fetched`));
+  }
+
+  static async getAllList(req: Request, res: Response) {
+    const resData = await AdminDatabase.getAdminList(req,true);// fetch others list too except super admin
+    res.status(200).send(ResponseModel.success(resData, `All list fetched`));
   }
 
   static async getAdminByStatus(req: Request, res: Response) {

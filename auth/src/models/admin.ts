@@ -12,6 +12,7 @@ export interface AdminAttrs {
   createdBy?: string | null;
   allowChangePassword: boolean;
   roleId: string;
+  isAdmin?: boolean;
 }
 
 // An interface that describe the properties
@@ -27,6 +28,7 @@ interface AdminDoc extends mongoose.Document {
   isMobileVerified: boolean;
   imageUrl: string;
   isSuperAdmin: boolean;
+  isAdmin: boolean;
   roleId: AdminRoleDoc;
   createdBy: string;
   updatedBy: string;
@@ -56,6 +58,7 @@ const AdminSchema = new mongoose.Schema(
     isMobileVerified: { type: Boolean, default: false },
     imageUrl: { type: String, default: '' },
     isSuperAdmin: { type: Boolean, default: false },
+    isAdmin: { type: Boolean, default: false },
     createdBy: { type: String, default: null, ref: 'Admin' },
     updatedBy: { type: String, default: '' },
     isActive: { type: Boolean, default: true },

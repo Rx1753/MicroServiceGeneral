@@ -80,12 +80,16 @@ export class Validation {
   static addPermissionsValidation = [
     body('tableName')
       .notEmpty()
-      .withMessage('Please provide tableName')
+      .withMessage('Please provide tableName ')
       .isIn([
         PermissionNameEnum[PermissionNameEnum.adminPanelPermissions],
         PermissionNameEnum[PermissionNameEnum.customerPermissions],
       ])
-      .withMessage('Please provide valid name'),
+      .withMessage(
+        `Please provide valid tableName from [${
+          PermissionNameEnum[PermissionNameEnum.adminPanelPermissions]
+        },${PermissionNameEnum[PermissionNameEnum.customerPermissions]}]`
+      ),
     body('isRead').isBoolean().withMessage('isRead is required'),
     body('isUpdate').isBoolean().withMessage('isUpdate is required'),
     body('isDelete').isBoolean().withMessage('isDelete is required'),

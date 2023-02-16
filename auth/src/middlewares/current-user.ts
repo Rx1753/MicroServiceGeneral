@@ -41,7 +41,7 @@ export const verifyToken = async (
   if (req.session?.jwt) {
     token = req.session?.jwt;
   } else {
-    req.headers.authorization!.split(' ')[1];
+    token = req.headers.authorization!.split(' ')[1];
   }
 
   try {
@@ -80,8 +80,6 @@ export const verifyAdminToken = async (
     token = req.headers.authorization!.split(' ')[1];
   }
 
-  console.log(`verifyAdminToken ::-> ${token}`);
-
   try {
     const payload = jwt.verify(token, process.env.JWT_KEY!) as UserPayload;
 
@@ -99,7 +97,7 @@ export const verifyAdminToken = async (
       );
     }
     req.currentUser = payload;
-    console.log('current user id', payload.id);
+    console.log('current user id aT ', payload.id);
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
       throw new BadRequestError(error.message);
@@ -171,6 +169,8 @@ export const verifyCustomerActiveToken = async (
     token = req.headers.authorization!.split(' ')[1];
   }
 
+  console.log(`Admin token ${token}`);
+
   try {
     const payload = jwt.verify(token, process.env.JWT_KEY!) as UserPayload;
     if (payload.type != PayloadType.CustomerType) {
@@ -186,7 +186,7 @@ export const verifyCustomerActiveToken = async (
       );
     }
     req.currentUser = payload;
-    console.log(`current user id ${payload.id}`);
+    console.log(`current user id cT ${payload.id}`);
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
       throw new BadRequestError(error.message);

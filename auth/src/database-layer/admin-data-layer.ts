@@ -36,7 +36,19 @@ export class AdminDatabase {
     return permission;
   }
 
-  static async createRole(roleName: string, permissionId: any) {
+  static async createRole(
+    roleName: string,
+    permissionId: any,
+    currentUserId: string
+  ) {
+    var isSuperAdminOrAdmin = await AdminDatabase.isSuperAdminOrAdmin(
+      currentUserId
+    );
+    if (!isSuperAdminOrAdmin) {
+      throw new BadRequestError(
+        'Permission Denied! Only super admin/admin can create role'
+      );
+    }
     const isRoleExists: any = await AdminRole.findOne({
       name: roleName,
     });
@@ -65,7 +77,15 @@ export class AdminDatabase {
     return data;
   }
 
-  static async updateRolePermissions(req: Request) {
+  static async updateRolePermissions(req: Request, currentUserId: string) {
+    var isSuperAdminOrAdmin = await AdminDatabase.isSuperAdminOrAdmin(
+      currentUserId
+    );
+    if (!isSuperAdminOrAdmin) {
+      throw new BadRequestError(
+        'Permission Denied! Only super admin/admin can update Roles with permissions'
+      );
+    }
     const { roleId, permissionId } = req.body;
     const isRoleExists: any = await AdminRole.findById(roleId);
     if (!isRoleExists) {
@@ -98,6 +118,32 @@ export class AdminDatabase {
     return isRoleExists;
   }
 
+  static async statusUpdateForAdmin(req: any) {
+    var isSuperAdminOrAdmin = await AdminDatabase.isSuperAdminOrAdmin(
+      req.currentUser.id
+    );
+
+    if (isSuperAdminOrAdmin && isSuperAdminOrAdmin?.isSuperAdmin) {
+      const data = await Admin.findById({ _id: req.params.id });
+      if (data && !data?.isSuperAdmin) {
+        var status = data.isActive ? false : true;
+        await Admin.findByIdAndUpdate(req.params.id, { isActive: status });
+        return {
+          success: true,
+          msg: 'Status updated successfully',
+          isActive: status,
+          id: data.id,
+        };
+      } else {
+        throw new BadRequestError('Invalid user id');
+      }
+    } else {
+      throw new BadRequestError(
+        'Permission denied! Only super admin can set the active status of admin'
+      );
+    }
+  }
+
   static async isExistingEmail(email: String) {
     const existingEmail: any = await Admin.findOne({
       $and: [{ email: email }, { isActive: true }],
@@ -116,11 +162,26 @@ export class AdminDatabase {
     return existingPhone;
   }
 
-  static async isAdminExist(id: String) {
+  static async isUserExist(id: String) {
     var isUserExist = await Admin.findOne({
       $and: [{ _id: id }, { isActive: true }],
     });
     return isUserExist;
+  }
+
+  static async isSuperAdminOrAdmin(id: String) {
+    var isSuperAdminOrAdmin = await Admin.findOne({
+      $and: [{ _id: id }, { isActive: true }],
+      $or: [{ isAdmin: true }, { isSuperAdmin: true }],
+    });
+    var statusRole = isSuperAdminOrAdmin?.isSuperAdmin
+      ? 'Super admin'
+      : isSuperAdminOrAdmin?.isAdmin
+      ? 'Admin'
+      : 'Other';
+
+    console.log(`current user is ${statusRole}`);
+    return isSuperAdminOrAdmin;
   }
 
   static async checkPassword(existingPassword: string, password: string) {
@@ -131,7 +192,7 @@ export class AdminDatabase {
     try {
       const adminDataUser = await Admin.findById({ _id: req.currentUser.id });
       if (adminDataUser?.isSuperAdmin) {
-        return await this.addUserToAdminTable(req);
+        return await this.addUserToAdminTable(req, true);
       } else {
         throw new BadRequestError(
           'Permission Denied! Only SuperAdmin can create admin'
@@ -144,12 +205,14 @@ export class AdminDatabase {
 
   static async addNewUser(req: any) {
     try {
-      var isCreatePermissionAllow = await this.isCreatePermissionAllow(
+      // var isCreatePermissionAllow = await this.isCreatePermissionAllow(
+      //   req.currentUser.id
+      // );
+      var isSuperAdminOrAdmin = await this.isSuperAdminOrAdmin(
         req.currentUser.id
       );
-      if (isCreatePermissionAllow) {
-        console.log(`currentUser :: Role name ::-> ${req.currentUser.id}`);
-        return await this.addUserToAdminTable(req);
+      if (isSuperAdminOrAdmin) {
+        return await this.addUserToAdminTable(req, false);
       } else {
         throw new BadRequestError(
           'Permission denied! You have no rights to create a new user'
@@ -160,7 +223,7 @@ export class AdminDatabase {
     }
   }
 
-  static async addUserToAdminTable(req: any) {
+  static async addUserToAdminTable(req: any, isAdmin: boolean) {
     const {
       userName,
       email,
@@ -183,6 +246,7 @@ export class AdminDatabase {
       allowChangePassword: isAllowChangePassword,
       roleId: roleId,
       countryCode: countryCode,
+      isAdmin: isAdmin,
     };
     if (
       phoneNumber == null &&
@@ -524,14 +588,21 @@ export class AdminDatabase {
     return result;
   }
 
-  static async getAdminList(req: any) {
+  static async getAdminList(req: any, fetchAllList: boolean) {
     var result;
     if (req.query?.pageNo == null && req.query?.limit == null) {
       //Without pagination
-      const totalData = await Admin.find({
-        isActive: true,
-        isSuperAdmin: false,
-      });
+      console.log(`getAdminList ::  isAdmin :: ${req.query?.isAdmin}`);
+      const totalData = fetchAllList
+        ? await Admin.find({
+            isActive: true,
+            isSuperAdmin: false,
+          })
+        : await Admin.find({
+            isActive: true,
+            isSuperAdmin: false,
+            isAdmin: true,
+          });
       result = {
         totalRecords: totalData.length,
         page: null,
@@ -553,16 +624,33 @@ export class AdminDatabase {
       var pageNo = parseInt(req.query.pageNo);
       var limit = parseInt(req.query.limit);
       var skip = pageNo * limit;
-      const totalData = await Admin.find({
-        isActive: true,
-        isSuperAdmin: false,
-      });
+      const totalData = fetchAllList
+        ? await Admin.find({
+            isActive: true,
+            isSuperAdmin: false,
+          })
+        : await Admin.find({
+            isActive: true,
+            isSuperAdmin: false,
+            isAdmin: true,
+          });
       console.log(
         `pageNo : ${pageNo} , limit : ${limit} , skip :: ${skip}, totalCount : ${totalData.length} `
       );
-      var data = await Admin.find({ isActive: true, isSuperAdmin: false })
-        .skip(skip)
-        .limit(limit);
+      var data = fetchAllList
+        ? await Admin.find({
+            isActive: true,
+            isSuperAdmin: false,
+          })
+            .skip(skip)
+            .limit(limit)
+        : await Admin.find({
+            isActive: true,
+            isSuperAdmin: false,
+            isAdmin: true,
+          })
+            .skip(skip)
+            .limit(limit);
 
       console.log(`pageNo : ${pageNo}, nextPage : ${pageNo + 1}`);
 
@@ -578,7 +666,6 @@ export class AdminDatabase {
 
   static async getAdminByStatus(req: Request) {
     //TODO : fetch admins list with isActive status
-    console.log(`Admin query ${JSON.stringify(req.query)}`);
     var adminData;
     if (req.query?.isSuperAdmin && req.query != null) {
       // if isSuperAdmin = false,
@@ -593,33 +680,6 @@ export class AdminDatabase {
       });
     }
     return adminData;
-  }
-
-  static async statusUpdateForAdmin(req: any) {
-    const adminData = await Admin.findOne({
-      _id: req.currentUser.id,
-      isSuperAdmin: true,
-    });
-
-    if (adminData) {
-      const data = await Admin.findById({ _id: req.params.id });
-      if (data && !data?.isSuperAdmin) {
-        var status = data.isActive ? false : true;
-        await Admin.findByIdAndUpdate(req.params.id, { isActive: status });
-        return {
-          success: true,
-          msg: 'Status updated successfully',
-          isActive: status,
-          id: data.id,
-        };
-      } else {
-        throw new BadRequestError('Invalid user id');
-      }
-    } else {
-      throw new BadRequestError(
-        'Permission denied! Only super admin can set the active status of admin'
-      );
-    }
   }
 
   static async getAdminByName(req: any) {
@@ -726,7 +786,7 @@ export class AdminDatabase {
 
   static async changePassword(req: any) {
     const { oldPassword, newPassword } = req.body;
-    const checkUser = await AdminDatabase.isAdminExist(req.currentUser?.id);
+    const checkUser = await AdminDatabase.isUserExist(req.currentUser?.id);
     if (!checkUser) {
       throw new BadRequestError('user does not exist');
     }

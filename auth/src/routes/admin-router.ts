@@ -12,60 +12,30 @@ const router = express.Router();
 
 //Admin Sign In
 router.post(
-  `/login`,
-  Validation.signInValidation,
-  validateRequest,
+  `/login`,Validation.signInValidation,validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.signIn
 );
 
 //Add permissions with Table name
 router.post(
-  `/permission`,
-  verifyAdminToken,
-  Validation.addPermissionsValidation,
-  validateRequest,
+  `/permission`,verifyAdminToken,Validation.addPermissionsValidation,validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.addPermissions
 );
 
 //Create role with permissions
 router.post(
-  `/create/role`,
-  verifyAdminToken,
-  Validation.createRoleValidation,
-  validateRequest,
+  `/create/role`,verifyAdminToken,Validation.createRoleValidation,validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.createRole
 );
 
 //Update the role with permissions
 router.put(
-  `/update/rolepermissions`,
-  verifyAdminToken,
-  Validation.updateRolePermissionValidation,
-  validateRequest,
+  `/update/rolepermissions`,verifyAdminToken,Validation.updateRolePermissionValidation,validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.updateRolePermissions
-);
-
-//Add admin user by super admin
-router.post(
-  `/addadmin`,
-  verifyAdminToken,
-  Validation.addAdminValidation,
-  validateRequest,
-  SwaggerTags.adminTag,
-  AdminDomain.addAdmin
-);
-//Add user with new role by admin/superadmin
-router.post(
-  `/adduser`,
-  verifyAdminToken,
-  Validation.addAdminValidation,
-  validateRequest,
-  SwaggerTags.adminTag,
-  AdminDomain.addNewUser
 );
 
 //Update Admin Role
@@ -82,19 +52,20 @@ router.put(
   AdminDomain.statusUpdateForAdmin
 );
 
-//Single User Detail
-router.get(
-  `/getadmins/:id`,verifyAdminToken,Validation.getSingleAdminDetailValidation,validateRequest,
+//Add admin user by super admin
+router.post(
+  `/addadmin`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
   SwaggerTags.adminTag,
-  AdminDomain.getUserById
+  AdminDomain.addAdmin
 );
-router.get(
-  `/getadminroles/:id`,verifyAdminToken,Validation.getAdminRoleByIdValidation,validateRequest,
+//Add user with new role by admin/superadmin
+router.post(
+  `/adduser`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
   SwaggerTags.adminTag,
-  AdminDomain.getAdminRoles
+  AdminDomain.addNewUser
 );
 
-// All list
+// GET
 // permissions
 router.get(
   `/getpermissions`,verifyAdminToken,
@@ -102,11 +73,31 @@ router.get(
   AdminDomain.getPermissions
 );
 
+
 router.get(
-  `/getadmins`,
-  verifyAdminToken,
+  `/getalllist`,verifyAdminToken,
+  SwaggerTags.adminTag,
+  AdminDomain.getAllList
+);
+
+//Single User Detail
+router.get(
+  `/getadmins/:id`,verifyAdminToken,Validation.getSingleAdminDetailValidation,validateRequest,
+  SwaggerTags.adminTag,
+  AdminDomain.getUserById
+);
+
+router.get(
+  `/getadmins`,verifyAdminToken,
   SwaggerTags.adminTag,
   AdminDomain.getAdminList
+);
+
+//Single Admin Role
+router.get(
+  `/getadminroles/:id`,verifyAdminToken,Validation.getAdminRoleByIdValidation,validateRequest,
+  SwaggerTags.adminTag,
+  AdminDomain.getAdminRoles
 );
 
 router.get(
