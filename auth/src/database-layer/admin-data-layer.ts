@@ -763,7 +763,23 @@ export class AdminDatabase {
     const currentUserData = await Admin.findById({ _id: currentUserId });
     var currentUserRolePermissions = await AdminRoleMapping.aggregate([
       { $match: { roleId: currentUserData?.roleId } },
-      { $addFields: { permissionObjId: { $toObjectId: '$permissionId' } } },
+      {
+        $addFields: {
+          permissionObjId: { $toObjectId: '$permissionId' },
+          roleObjId: { $toObjectId: '$roleId' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'adminroles',
+          localField: 'roleObjId',
+          foreignField: '_id',
+          as: 'roleData',
+        },
+      },
+      {
+        $unwind: '$roleData',
+      },
       {
         $lookup: {
           from: 'adminpermissions',
@@ -787,7 +803,12 @@ export class AdminDatabase {
       currentUserRolePermissions != null &&
       currentUserRolePermissions.length > 0
     ) {
-      return true;
+      console.log(
+        `currentUserRolePermissions ::-- ${JSON.stringify(
+          currentUserRolePermissions
+        )}`
+      );
+      return currentUserRolePermissions[0];
     } else {
       return null;
     }

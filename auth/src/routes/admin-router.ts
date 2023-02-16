@@ -10,45 +10,62 @@ import { SwaggerTags } from '../services/set-swagger-tags';
 
 const router = express.Router();
 
+//Admin Sign In
+router.post(
+  `/login`,
+  Validation.signInValidation,
+  validateRequest,
+  SwaggerTags.adminTag,
+  AdminDomain.signIn
+);
+
 //Add permissions with Table name
 router.post(
-  `/permission`,verifyAdminToken,Validation.addPermissionsValidation,validateRequest,
+  `/permission`,
+  verifyAdminToken,
+  Validation.addPermissionsValidation,
+  validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.addPermissions
 );
 
 //Create role with permissions
 router.post(
-  `/create/role`,verifyAdminToken,Validation.createRoleValidation,validateRequest,
+  `/create/role`,
+  verifyAdminToken,
+  Validation.createRoleValidation,
+  validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.createRole
 );
 
 //Update the role with permissions
 router.put(
-  `/update/rolepermissions`,verifyAdminToken,Validation.updateRolePermissionValidation,validateRequest,
+  `/update/rolepermissions`,
+  verifyAdminToken,
+  Validation.updateRolePermissionValidation,
+  validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.updateRolePermissions
 );
 
 //Add admin user by super admin
 router.post(
-  `/addadmin`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
+  `/addadmin`,
+  verifyAdminToken,
+  Validation.addAdminValidation,
+  validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.addAdmin
 );
 //Add user with new role by admin/superadmin
 router.post(
-  `/adduser`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
+  `/adduser`,
+  verifyAdminToken,
+  Validation.addAdminValidation,
+  validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.addNewUser
-);
-
-//Admin Sign In
-router.post(
-  `/login`,Validation.signInValidation,validateRequest,
-  SwaggerTags.adminTag,
-  AdminDomain.signIn
 );
 
 //Update Admin Role
@@ -86,7 +103,8 @@ router.get(
 );
 
 router.get(
-  `/getadmins`,verifyAdminToken,validateRequest,
+  `/getadmins`,
+  verifyAdminToken,
   SwaggerTags.adminTag,
   AdminDomain.getAdminList
 );
@@ -112,13 +130,13 @@ router.get(
 
 //forgot password
 router.post(
-  `/forgotpassword/sendotp`,verifyAdminToken,Validation.forgotPasswordValidation,validateRequest,
+  `/forgotpassword/sendotp`,Validation.forgotPasswordValidation,validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.forgotPassword
 );
 
 router.post(
-  `/forgotpassword/verifyotp`,verifyAdminToken,Validation.forgotPasswordVerificationValidation,validateRequest,
+  `/forgotpassword/verifyotp`,Validation.forgotPasswordVerificationValidation,validateRequest,
   SwaggerTags.adminTag,
   AdminDomain.forgotPasswordVerification
 );

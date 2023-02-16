@@ -117,11 +117,12 @@ export class CustomerDomain {
         phoneNo,
         countryCodeId
       );
-      req.session = { jwt: accessToken, refreshToken: newRefreshToken };
+      //req.session = { jwt: accessToken, refreshToken: newRefreshToken };
       const resData = JSON.parse(
         JSON.stringify(isEmailExist ? isEmailExist : isPhoneNumberExist)
       );
       resData.accessToken = accessToken;
+      resData.session = { jwt: accessToken, refreshToken: newRefreshToken };
       return res
         .status(200)
         .send(ResponseModel.success(resData, `Sign In successful`));

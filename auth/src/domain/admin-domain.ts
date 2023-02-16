@@ -6,7 +6,8 @@ import { ResponseModel } from '../services/response-model';
 
 export class AdminDomain {
 
-  static async addPermissions(req: Request, res: Response) {
+  //On check of permission allow to add permissions
+  static async addPermissions(req: any, res: Response) {
     const data: AdminPermissionsAttrs = req.body;
     var isPermissionExistWithTN = await AdminDatabase.checkPermissionExist(data);
     if (isPermissionExistWithTN) {
@@ -20,17 +21,20 @@ export class AdminDomain {
     }
   }
 
-  static async createRole(req: Request, res: Response) {
+  //On check of permission allow to create role
+  static async createRole(req: any, res: Response) {
     const { roleName, permissionId } = req.body;
-    var data = await AdminDatabase.createRole(roleName, permissionId);
+    var data = await AdminDatabase.createRole(roleName, permissionId,req.currentUser.id);
     res.status(201).send(ResponseModel.success(data, `Role created`));
   }
 
-  static async updateRolePermissions(req: Request, res: Response) {
-    var data = await AdminDatabase.updateRolePermissions(req);
+  //On check of permission allow to update role
+  static async updateRolePermissions(req: any, res: Response) {
+    var data = await AdminDatabase.updateRolePermissions(req,req.currentUser.id);
     res.status(200).send(ResponseModel.success(data, `Role updated`));
   }
 
+  //Only Super admin can update the status of active/inactive admins
   static async statusUpdateForAdmin(req: Request, res: Response) {
     var resData = await AdminDatabase.statusUpdateForAdmin(req);
     res.status(200).send(ResponseModel.success(resData, `updated admin status`));
@@ -95,11 +99,12 @@ export class AdminDomain {
         phoneNo,
         countryCodeId
       );
-      req.session = { jwt: accessToken, refreshToken: newRefreshToken };
+      //req.session = { jwt: accessToken, refreshToken: newRefreshToken };
       //console.log('session', req.session);
       const resData = JSON.parse(JSON.stringify(data));
       resData.accessToken = accessToken;
       resData.refreshToken = newRefreshToken;
+      resData.session = { jwt: accessToken, refreshToken: newRefreshToken };
 
       return res.status(200).send(ResponseModel.success(resData, `Sign in successfully`));
     }

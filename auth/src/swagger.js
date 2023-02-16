@@ -9,9 +9,9 @@ const doc = {
 
   host: '', // by default: 'localhost:3000'
   basePath: '', // by default: '/'
-  schemes: ['https'], // by default: ['http']
-  consumes: ['application/json'], // by default: ['application/json']
-  produces: ['application/json'], // by default: ['application/json']
+  schemes: [], // by default: ['http']
+  consumes: [], // by default: ['application/json']
+  produces: [], // by default: ['application/json']
   tags: [
     // by default: empty Array
     {
@@ -40,16 +40,8 @@ const doc = {
     },
     // { ... }
   ],
-  securityDefinitions: {
-    api_key: {
-      type: 'apiKey',
-      name: 'api_key',
-      in: 'header',
-    },
-  },
-  security: {
-    apiKey: [],
-  },
+  securityDefinitions: {},
+  security: [],
   // by default: empty object
   definitions: {}, // by default: empty object (Swagger 2.0)
   components: {}, // by default: empty object (OpenAPI 3.x)

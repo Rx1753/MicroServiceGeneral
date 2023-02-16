@@ -81,7 +81,10 @@ export class Validation {
     body('tableName')
       .notEmpty()
       .withMessage('Please provide tableName')
-      .isIn([PermissionNameEnum[PermissionNameEnum.adminPanelPermissions]])
+      .isIn([
+        PermissionNameEnum[PermissionNameEnum.adminPanelPermissions],
+        PermissionNameEnum[PermissionNameEnum.customerPermissions],
+      ])
       .withMessage('Please provide valid name'),
     body('isRead').isBoolean().withMessage('isRead is required'),
     body('isUpdate').isBoolean().withMessage('isUpdate is required'),
