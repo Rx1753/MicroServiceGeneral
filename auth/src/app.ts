@@ -9,6 +9,8 @@ import { countryRouter } from './routes/country-router';
 import { stateRouter } from './routes/state-router';
 import { cityRouter } from './routes/city-router';
 import { customerAddressRouter } from './routes/customer-address';
+import swaggerUi from 'swagger-ui-express';
+import * as swaggerDocument from '../src/swagger.json';
 
 const app = express();
 
@@ -22,14 +24,16 @@ app.use(
     secure: true, // use cookie only on https connection
   })
 );
+app.use('/api/authswagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 //Router
-app.use(adminAuthRouter);
-app.use(customerRouter);
-app.use(countryRouter);
-app.use(stateRouter);
-app.use(cityRouter);
-app.use(customerAddressRouter);
+app.use('/api/users/admin', adminAuthRouter);
+app.use('/api/users/customer', customerRouter);
+app.use('/api/users/customer/address', customerAddressRouter);
+app.use('/api/users/country', countryRouter);
+app.use('/api/users/state', stateRouter);
+app.use('/api/users/city', cityRouter);
+
 
 app.all('*', async () => {
   throw new NotFoundError();

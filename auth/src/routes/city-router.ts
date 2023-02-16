@@ -1,41 +1,44 @@
 import { validateRequest } from '@rx-projects/common';
 import express, { Request, Response, Router } from 'express';
 import { CityDomain } from '../domain/city-domain';
-import { verifyAdminToken,verifyToken } from '../middlewares/current-user';
+import { verifyAdminToken, verifyToken } from '../middlewares/current-user';
+import { SwaggerTags } from '../services/set-swagger-tags';
 import { CityValidation } from '../validations/city-validation';
 
 const router = express.Router();
-var baseUrl = `/api/users/city`;
-
 //add city
 router.post(
-  `${baseUrl}/create`,verifyAdminToken,CityValidation.cityCreateValidation,validateRequest,
-  CityDomain.createCity
+  `/create`,verifyAdminToken,CityValidation.cityCreateValidation,validateRequest,
+  SwaggerTags.cityTag,CityDomain.createCity
 );
 
 //update city
 router.put(
-  `${baseUrl}/update/:id`,verifyAdminToken,CityValidation.cityUpdateValidation,validateRequest,
-  CityDomain.updateCity
+  `/update/:id`,verifyAdminToken,CityValidation.cityUpdateValidation,validateRequest,
+  SwaggerTags.cityTag,CityDomain.updateCity
 );
 
 //delete city
 router.delete(
-  `${baseUrl}/delete/:id`,verifyAdminToken,CityValidation.cityDeleteValidation,validateRequest,
-  CityDomain.deleteCity
+  `/delete/:id`,verifyAdminToken,CityValidation.cityDeleteValidation,validateRequest,
+  SwaggerTags.cityTag,CityDomain.deleteCity
 );
 
 // // get all city
-router.get(`${baseUrl}/getcities`, verifyToken, CityDomain.getCityList);
-
 router.get(
-  `${baseUrl}/getlistbystatus`, verifyToken,CityValidation.getListByStatusValidation,validateRequest,
-  CityDomain.getListBystatus
+  `/getcities`,verifyToken,
+  SwaggerTags.cityTag,CityDomain.getCityList
 );
 
 router.get(
-  `${baseUrl}/getlistbyname`, verifyToken, CityValidation.getCityByNameValidation,validateRequest,
-  CityDomain.getCityByName
+  `/getlistbystatus`,
+  verifyToken,CityValidation.getListByStatusValidation,validateRequest,
+  SwaggerTags.cityTag,CityDomain.getListBystatus
+);
+
+router.get(
+  `/getlistbyname`,verifyToken,CityValidation.getCityByNameValidation,validateRequest,
+  SwaggerTags.cityTag,CityDomain.getCityByName
 );
 
 export { router as cityRouter };
