@@ -3,95 +3,111 @@ import { verifyCustomerActiveToken, verifyToken } from '../middlewares/current-u
 import { validateRequest } from '@rx-projects/common';
 import { CustomerAuthValidation } from '../validations/customer-validation';
 import { CustomerDomain } from '../domain/customer-domain';
+import { SwaggerTags } from '../services/set-swagger-tags';
 
 const router = express.Router();
-var baseUrl = `/api/users/customer`;
 
 //sign up
 router.post(
-  `${baseUrl}/signup`,CustomerAuthValidation.signupValidation,validateRequest,CustomerDomain.signUp
+  `/signup`,CustomerAuthValidation.signupValidation,validateRequest,
+  SwaggerTags.customerTag,
+  CustomerDomain.signUp
 );
 
 //sign in
 router.post(
-  `${baseUrl}/signin`,CustomerAuthValidation.signInValidation,validateRequest,CustomerDomain.signIn
+  `/signin`,CustomerAuthValidation.signInValidation,validateRequest,
+  SwaggerTags.customerTag,
+  CustomerDomain.signIn
 );
 
 router.put(
-  `${baseUrl}/updateprofile/:id`,verifyCustomerActiveToken,CustomerAuthValidation.updateProfileValidation,validateRequest,
+  `/updateprofile/:id`,verifyCustomerActiveToken,CustomerAuthValidation.updateProfileValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.updateProfile
 );
 
 router.post(
-  `${baseUrl}/changepassword`,verifyCustomerActiveToken,CustomerAuthValidation.changePasswordValidation,validateRequest,
+  `/changepassword`,verifyCustomerActiveToken,CustomerAuthValidation.changePasswordValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.changePassword
 );
 
 router.post(
-  `${baseUrl}/forgotpassword/sendotp`,CustomerAuthValidation.forgotPasswordValidation,validateRequest,
+  `/forgotpassword/sendotp`,CustomerAuthValidation.forgotPasswordValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.forgotPasswordSendOtp
 );
 
 router.post(
-  `${baseUrl}/forgotpassword/verifyotp`,CustomerAuthValidation.forgotPasswordVerificationValidation,validateRequest,
+  `/forgotpassword/verifyotp`,CustomerAuthValidation.forgotPasswordVerificationValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.forgotPasswordVerifyOtp
 );
 
 router.delete(
-  `${baseUrl}/delete/:id`,verifyCustomerActiveToken,CustomerAuthValidation.deleteCustomer,validateRequest,
+  `/delete/:id`,verifyCustomerActiveToken,CustomerAuthValidation.deleteCustomer,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.deleteCustomer
 );
 
 //isMfa active
 router.post(
-  `${baseUrl}/mfa`,verifyCustomerActiveToken,CustomerAuthValidation.checkMFA,validateRequest,
+  `/mfa`,verifyCustomerActiveToken,CustomerAuthValidation.checkMFA,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.checkMFA
 );
 
 router.post(
-  `${baseUrl}/mfa/sendemail`,verifyCustomerActiveToken,CustomerAuthValidation.sendEmailMFA,validateRequest,
+  `/mfa/sendemail`,verifyCustomerActiveToken,CustomerAuthValidation.sendEmailMFA,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.sendEmailMFA
 );
 
 router.post(
-  `${baseUrl}/mfa/sendsms`,verifyCustomerActiveToken,CustomerAuthValidation.sendSmsMFA,validateRequest,
+  `/mfa/sendsms`,verifyCustomerActiveToken,CustomerAuthValidation.sendSmsMFA,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.sendSmsMFA
 );
 
 router.post(
-  `${baseUrl}/mfa/verifyemail`,verifyCustomerActiveToken,CustomerAuthValidation.verifyEmailValidation,validateRequest,
+  `/mfa/verifyemail`,verifyCustomerActiveToken,CustomerAuthValidation.verifyEmailValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.verifyEmail
 );
 router.post(
-  `${baseUrl}/mfa/verifyphone`,verifyCustomerActiveToken,CustomerAuthValidation.verifyPhoneNumberValidation,validateRequest,
+  `/mfa/verifyphone`,verifyCustomerActiveToken,CustomerAuthValidation.verifyPhoneNumberValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.verifyPhoneNumber
 );
 
 //customers list
-router.get(`${baseUrl}/getcustomers`, verifyToken, CustomerDomain.getCustomers);
+router.get(`/getcustomers`, verifyToken, SwaggerTags.customerTag, CustomerDomain.getCustomers);
 
 router.get(
-  `${baseUrl}/getlistbystatus`,verifyToken,CustomerAuthValidation.getListByStatusValidation,validateRequest,
+  `/getlistbystatus`,verifyToken,CustomerAuthValidation.getListByStatusValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.getCustomerByStatus
 );
 
 router.get(
-  `${baseUrl}/getlistbyname`,verifyToken,CustomerAuthValidation.getListByNameValidation,validateRequest,
+  `/getlistbyname`,verifyToken,CustomerAuthValidation.getListByNameValidation,validateRequest,
+  SwaggerTags.customerTag,
   CustomerDomain.getCustomerByName
 );
 
 router.get(
-  `${baseUrl}/deletedcustomers`,verifyToken,CustomerDomain.getListOfDeletedAccounts
+  `/deletedcustomers`,verifyToken, SwaggerTags.customerTag,CustomerDomain.getListOfDeletedAccounts
 );
 
 router.get(
-  `${baseUrl}/currentuser`,verifyCustomerActiveToken,CustomerDomain.currentLoginUser
+  `/currentuser`,verifyCustomerActiveToken, SwaggerTags.customerTag,CustomerDomain.currentLoginUser
 );
 
 router.get(
-  `${baseUrl}/refreshtoken`,verifyCustomerActiveToken,CustomerDomain.getRefreshToken
+  `/refreshtoken`,verifyCustomerActiveToken, SwaggerTags.customerTag,CustomerDomain.getRefreshToken
 );
 
-router.post(`${baseUrl}/signout`, verifyCustomerActiveToken, CustomerDomain.signOut);
+router.post(`/signout`, verifyCustomerActiveToken, SwaggerTags.customerTag, CustomerDomain.signOut);
 
 export { router as customerRouter };

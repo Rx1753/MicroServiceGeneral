@@ -6,113 +6,140 @@ import { verifyAdminToken } from '../middlewares/current-user';
 import { MailService } from '../services/mail-service';
 import { HtmlTemplate } from '../services/html-templates';
 import { SendSmsService } from '../services/send-sms-service';
+import { SwaggerTags } from '../services/set-swagger-tags';
 
 const router = express.Router();
-const baseUrl = `/api/users/admin`;
+
+//Admin Sign In
+router.post(
+  `/login`,Validation.signInValidation,validateRequest,
+  SwaggerTags.adminTag,
+  AdminDomain.signIn
+);
 
 //Add permissions with Table name
 router.post(
-  `${baseUrl}/permission`,verifyAdminToken,Validation.addPermissionsValidation,validateRequest,
+  `/permission`,verifyAdminToken,Validation.addPermissionsValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.addPermissions
 );
 
 //Create role with permissions
 router.post(
-  `${baseUrl}/create/role`,verifyAdminToken,Validation.createRoleValidation,validateRequest,
+  `/create/role`,verifyAdminToken,Validation.createRoleValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.createRole
 );
 
 //Update the role with permissions
 router.put(
-  `${baseUrl}/update/rolepermissions`,verifyAdminToken,Validation.updateRolePermissionValidation,validateRequest,
+  `/update/rolepermissions`,verifyAdminToken,Validation.updateRolePermissionValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.updateRolePermissions
-);
-
-//Add admin user by super admin
-router.post(
-  `${baseUrl}/addadmin`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
-  AdminDomain.addAdmin
-);
-//Add user with new role by admin/superadmin
-router.post(
-  `${baseUrl}/adduser`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
-  AdminDomain.addNewUser
-);
-
-//Admin Sign In
-router.post(
-  `${baseUrl}/login`,Validation.signInValidation,validateRequest,
-  AdminDomain.signIn
 );
 
 //Update Admin Role
 router.put(
-  `${baseUrl}/update/adminrole`,verifyAdminToken,Validation.updateAdminRoleValidation,validateRequest,
+  `/update/adminrole`,verifyAdminToken,Validation.updateAdminRoleValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.updateAdminRole
 );
 
 // Active/InActive status
 router.put(
-  `${baseUrl}/updatestatus/:id`,verifyAdminToken,Validation.updateAdminStatusValidation,validateRequest,
+  `/updatestatus/:id`,verifyAdminToken,Validation.updateAdminStatusValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.statusUpdateForAdmin
+);
+
+//Add admin user by super admin
+router.post(
+  `/addadmin`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
+  SwaggerTags.adminTag,
+  AdminDomain.addAdmin
+);
+//Add user with new role by admin/superadmin
+router.post(
+  `/adduser`,verifyAdminToken,Validation.addAdminValidation,validateRequest,
+  SwaggerTags.adminTag,
+  AdminDomain.addNewUser
+);
+
+// GET
+// permissions
+router.get(
+  `/getpermissions`,verifyAdminToken,
+  SwaggerTags.adminTag,
+  AdminDomain.getPermissions
+);
+
+
+router.get(
+  `/getalllist`,verifyAdminToken,
+  SwaggerTags.adminTag,
+  AdminDomain.getAllList
 );
 
 //Single User Detail
 router.get(
-  `${baseUrl}/getadmins/:id`,verifyAdminToken,Validation.getSingleAdminDetailValidation,validateRequest,
+  `/getadmins/:id`,verifyAdminToken,Validation.getSingleAdminDetailValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.getUserById
 );
-router.get(
-  `${baseUrl}/getadminroles/:id`,verifyAdminToken,Validation.getAdminRoleByIdValidation,validateRequest,
-  AdminDomain.getAdminRoles
-);
-
-// All list
-// permissions
-router.get(
-  `${baseUrl}/getpermissions`,verifyAdminToken,
-  AdminDomain.getPermissions
-);
 
 router.get(
-  `${baseUrl}/getadmins`,verifyAdminToken,validateRequest,
+  `/getadmins`,verifyAdminToken,
+  SwaggerTags.adminTag,
   AdminDomain.getAdminList
 );
 
+//Single Admin Role
 router.get(
-  `${baseUrl}/getadminroles`,verifyAdminToken,
+  `/getadminroles/:id`,verifyAdminToken,Validation.getAdminRoleByIdValidation,validateRequest,
+  SwaggerTags.adminTag,
+  AdminDomain.getAdminRoles
+);
+
+router.get(
+  `/getadminroles`,verifyAdminToken,
+  SwaggerTags.adminTag,
   AdminDomain.getAdminRolesList
 );
 
 router.get(
-  `${baseUrl}/getlistbystatus`,verifyAdminToken,Validation.getListByStatusValidation,validateRequest,
+  `/getlistbystatus`,verifyAdminToken,Validation.getListByStatusValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.getAdminByStatus
 );
 
 // Search
 router.get(
-  `${baseUrl}/getadminbyname`,verifyAdminToken,
+  `/getadminbyname`,verifyAdminToken,
+  SwaggerTags.adminTag,
   AdminDomain.getAdminByName
 );
 
 //forgot password
 router.post(
-  `${baseUrl}/forgotpassword/sendotp`,verifyAdminToken,Validation.forgotPasswordValidation,validateRequest,
+  `/forgotpassword/sendotp`,Validation.forgotPasswordValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.forgotPassword
 );
 
 router.post(
-  `${baseUrl}/forgotpassword/verifyotp`,verifyAdminToken,Validation.forgotPasswordVerificationValidation,validateRequest,
+  `/forgotpassword/verifyotp`,Validation.forgotPasswordVerificationValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.forgotPasswordVerification
 );
 
 //change password
 router.post(
-  `${baseUrl}/changepassword`,verifyAdminToken,Validation.changePasswordValidation,validateRequest,
+  `/changepassword`,verifyAdminToken,Validation.changePasswordValidation,validateRequest,
+  SwaggerTags.adminTag,
   AdminDomain.changePassword
 );
 
-// router.post(`${baseUrl}/sendemail`, async (req: any, res: any) => {
+// router.post(`/sendemail`, async (req: any, res: any) => {
 //   var email = 'admin@gmail.com';
 //   var password = '12345678';
 //   var html = HtmlTemplate.sendEmailWithCredentials('Test', email, password);
@@ -126,7 +153,7 @@ router.post(
 //   });
 // });
 
-// router.post(`${baseUrl}/sendsms`, async (req: any, res: any) => {
+// router.post(`/sendsms`, async (req: any, res: any) => {
 //   await SendSmsService.sendSms(
 //     'This is the first content sms',
 //     '+919974146404'

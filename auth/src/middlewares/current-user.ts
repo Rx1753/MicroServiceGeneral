@@ -27,16 +27,21 @@ export const verifyToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.session?.jwt && !req.headers['token']) {
-    console.log('token is empty');
+  if (!req.session?.jwt && !req.headers['authorization']) {
+    console.log(`Token not provided :: verifyToken`);
     throw new BadRequestError('Token/Session not provided');
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization!.split(' ')[0] !== 'Bearer'
+  ) {
+    throw new BadRequestError('Bearer not provided');
   }
 
   var token;
   if (req.session?.jwt) {
     token = req.session?.jwt;
   } else {
-    token = req.headers['token'];
+    token = req.headers.authorization!.split(' ')[1];
   }
 
   try {
@@ -58,16 +63,21 @@ export const verifyAdminToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.session?.jwt && !req.headers['token']) {
-    console.log('Token not provided');
+  if (!req.session?.jwt && !req.headers['authorization']) {
+    console.log(`Token not provided :: admin`);
     throw new BadRequestError('Token/Session not provided');
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization!.split(' ')[0] !== 'Bearer'
+  ) {
+    throw new BadRequestError('Bearer not provided');
   }
 
   var token;
   if (req.session?.jwt) {
     token = req.session?.jwt;
   } else {
-    token = req.headers['token'];
+    token = req.headers.authorization!.split(' ')[1];
   }
 
   try {
@@ -87,7 +97,7 @@ export const verifyAdminToken = async (
       );
     }
     req.currentUser = payload;
-    console.log('current user id', payload.id);
+    console.log('current user id aT ', payload.id);
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
       throw new BadRequestError(error.message);
@@ -142,17 +152,24 @@ export const verifyCustomerActiveToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (!req.session?.jwt && !req.headers['token']) {
-    console.log('token not wrote');
+  if (!req.session?.jwt && !req.headers['authorization']) {
+    console.log(`Token not provided :: customer`);
     throw new BadRequestError('Token/Session not provided');
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization!.split(' ')[0] !== 'Bearer'
+  ) {
+    throw new BadRequestError('Bearer not provided');
   }
 
   var token;
   if (req.session?.jwt) {
     token = req.session?.jwt;
   } else {
-    token = req.headers['token'];
+    token = req.headers.authorization!.split(' ')[1];
   }
+
+  console.log(`Admin token ${token}`);
 
   try {
     const payload = jwt.verify(token, process.env.JWT_KEY!) as UserPayload;
@@ -169,7 +186,7 @@ export const verifyCustomerActiveToken = async (
       );
     }
     req.currentUser = payload;
-    console.log(`current user id ${payload.id}`);
+    console.log(`current user id cT ${payload.id}`);
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
       throw new BadRequestError(error.message);

@@ -2,37 +2,42 @@ import { validateRequest } from '@rx-projects/common';
 import express, { Request, Response, Router } from 'express';
 import { CustomerAddressDomain } from '../domain/customer-address-domain';
 import { verifyCustomerActiveToken } from '../middlewares/current-user';
+import { SwaggerTags } from '../services/set-swagger-tags';
 import { CustomerAddressValidation } from '../validations/customer-address-validation';
 
 const router = express.Router();
-const baseUrl = `/api/users/customer/address`;
 
 // add address
 router.post(
-  `${baseUrl}/create`,verifyCustomerActiveToken,CustomerAddressValidation.addAddressValidations,validateRequest,
+  `/create`,verifyCustomerActiveToken,CustomerAddressValidation.addAddressValidations,validateRequest,
+  SwaggerTags.customerAddressTag,
   CustomerAddressDomain.addAddress
 );
 
 // update user address
 router.put(
-  `${baseUrl}/update/:id`,verifyCustomerActiveToken,CustomerAddressValidation.updateAddressValidations,validateRequest,
+  `/update/:id`,verifyCustomerActiveToken,CustomerAddressValidation.updateAddressValidations,validateRequest,
+  SwaggerTags.customerAddressTag,
   CustomerAddressDomain.updateAddress
 );
 
 // delete user address
 router.delete(
-  `${baseUrl}/delete/:id`,verifyCustomerActiveToken,CustomerAddressValidation.deleteAddressValidations,validateRequest,
+  `/delete/:id`,verifyCustomerActiveToken,CustomerAddressValidation.deleteAddressValidations,validateRequest,
+  SwaggerTags.customerAddressTag,
   CustomerAddressDomain.deleteAddress
 );
 
 router.get(
-  `${baseUrl}/getaddress/single/:id`,verifyCustomerActiveToken,CustomerAddressValidation.findByIdAddressValidations,validateRequest,
+  `/getaddress/single/:id`,verifyCustomerActiveToken,CustomerAddressValidation.findByIdAddressValidations,validateRequest,
+  SwaggerTags.customerAddressTag,
   CustomerAddressDomain.findByIdAddressValidations
 );
 
 // get all address list
 router.get(
-  `${baseUrl}/getaddress/:customerId`,verifyCustomerActiveToken,CustomerAddressValidation.customerAddressValidations,validateRequest,
+  `/getaddress/:customerId`,verifyCustomerActiveToken,CustomerAddressValidation.customerAddressValidations,validateRequest,
+  SwaggerTags.customerAddressTag,
   CustomerAddressDomain.getCurrentUserAddress
 );
 

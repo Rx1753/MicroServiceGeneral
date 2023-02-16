@@ -188,9 +188,10 @@ export class CustomerDataBaseLayer {
       );
 
       // Store it on session object
-      req.session = { jwt: userJwt, refreshToken: saveData.refreshToken };
+      //req.session = { jwt: userJwt, refreshToken: saveData.refreshToken };
       const resData = JSON.parse(JSON.stringify(saveData));
       resData.accessToken = userJwt;
+      resData.session = { jwt: userJwt, refreshToken: saveData.refreshToken };
       return resData;
     } catch (error: any) {
       throw new BadRequestError(error.message);
@@ -268,9 +269,10 @@ export class CustomerDataBaseLayer {
     });
 
     var updatedData = await Customer.findById({ _id: id });
-    req.session = { jwt: userJwt };
+    //req.session = { jwt: userJwt };
     const resData = JSON.parse(JSON.stringify(updatedData));
     resData.accessToken = userJwt;
+    resData.session = { jwt: userJwt };
     return resData;
   }
 

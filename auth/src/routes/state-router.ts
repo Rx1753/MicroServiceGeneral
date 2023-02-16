@@ -2,41 +2,46 @@ import { validateRequest } from '@rx-projects/common';
 import express, { Request, Response, Router } from 'express';
 import { StateDomain } from '../domain/state-domain';
 import { verifyAdminToken,verifyToken } from '../middlewares/current-user';
+import { SwaggerTags } from '../services/set-swagger-tags';
 import { StateValidation } from '../validations/state-validation';
 
 const router = express.Router();
-const baseUrl = `/api/users/state`;
 
 //ADMIN Middleware
 
 //add state
 router.post(
-  `${baseUrl}/create`,verifyAdminToken,StateValidation.stateCreateValidation,validateRequest,
+  `/create`,verifyAdminToken,StateValidation.stateCreateValidation,validateRequest,
+  SwaggerTags.stateTag,
   StateDomain.createState
 );
 
 //update state
 router.put(
-  `${baseUrl}/update/:id`,verifyAdminToken,StateValidation.stateUpdateValidation,validateRequest,
+  `/update/:id`,verifyAdminToken,StateValidation.stateUpdateValidation,validateRequest,
+  SwaggerTags.stateTag,
   StateDomain.updateState
 );
 
 //delete state
 router.delete(
-  `${baseUrl}/delete/:id`,verifyAdminToken,StateValidation.stateDeleteValidation,validateRequest,
+  `/delete/:id`,verifyAdminToken,StateValidation.stateDeleteValidation,validateRequest,
+  SwaggerTags.stateTag,
   StateDomain.deleteState
 );
 
 // get all States
-router.get(`${baseUrl}/getstates`, verifyToken,  StateDomain.getStateList);
+router.get(`/getstates`, verifyToken, SwaggerTags.stateTag, StateDomain.getStateList);
 
 router.get(
-  `${baseUrl}/getlistbystatus`, verifyToken, StateValidation.getListByStatusValidation,validateRequest,
+  `/getlistbystatus`, verifyToken, StateValidation.getListByStatusValidation,validateRequest,
+  SwaggerTags.stateTag,
   StateDomain.getListBystatus
 );
 
 router.get(
-  `${baseUrl}/getlistbyname`, verifyToken, StateValidation.getStateByNameValidation,validateRequest,
+  `/getlistbyname`, verifyToken, StateValidation.getStateByNameValidation,validateRequest,
+  SwaggerTags.stateTag,
   StateDomain.getStateByName
 );
 

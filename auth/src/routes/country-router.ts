@@ -3,38 +3,43 @@ import express, { Request, Response, Router } from 'express';
 import { verifyAdminToken, verifyToken } from '../middlewares/current-user';
 import { CountryValidation } from '../validations/country-validation';
 import { CountryDomain } from '../domain/country-domain';
+import { SwaggerTags } from '../services/set-swagger-tags';
 
 const router = express.Router();
-const baseUrl = `/api/users/country`;
 
 // Country create
 router.post(
-  `${baseUrl}/create`,verifyAdminToken,CountryValidation.countryCreateValidation,validateRequest,
+  `/create`,verifyAdminToken,CountryValidation.countryCreateValidation,validateRequest,
+  SwaggerTags.countryTag,
   CountryDomain.createCountry
 );
 
 // Country update
 router.put(
-  `${baseUrl}/update/:id`,verifyAdminToken,CountryValidation.countryUpdateValidation,validateRequest,
+  `/update/:id`,verifyAdminToken,CountryValidation.countryUpdateValidation,validateRequest,
+  SwaggerTags.countryTag,
   CountryDomain.updateCountry
 );
 
 // delete Country
 router.delete(
-  `${baseUrl}/delete/:id`,verifyAdminToken,CountryValidation.countryDeleteValidation,validateRequest,
+  `/delete/:id`,verifyAdminToken,CountryValidation.countryDeleteValidation,validateRequest,
+  SwaggerTags.countryTag,
   CountryDomain.deleteCountry
 );
 
 // get all Country
-router.get(`${baseUrl}/getcountries`,verifyToken, CountryDomain.getCountryList);
+router.get(`/getcountries`,verifyToken, SwaggerTags.countryTag,CountryDomain.getCountryList);
 
 router.get(
-  `${baseUrl}/getlistbystatus`,verifyToken,CountryValidation.getListByStatusValidation,validateRequest,
+  `/getlistbystatus`,verifyToken,CountryValidation.getListByStatusValidation,validateRequest,
+  SwaggerTags.countryTag,
   CountryDomain.getCountryByStatus
 );
 
 router.get(
-  `${baseUrl}/getlistbyname`,verifyToken,CountryValidation.getCountryByNameValidation,validateRequest,
+  `/getlistbyname`,verifyToken,CountryValidation.getCountryByNameValidation,validateRequest,
+  SwaggerTags.countryTag,
   CountryDomain.getCountryByName
 );
 
