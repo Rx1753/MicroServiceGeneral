@@ -24,13 +24,13 @@ export class AdminDomain {
   //On check of permission allow to create role
   static async createRole(req: any, res: Response) {
     const { roleName, permissionId } = req.body;
-    var data = await AdminDatabase.createRole(roleName, permissionId,req.currentUser.id);
+    var data = await AdminDatabase.createRole(roleName, permissionId);
     res.status(201).send(ResponseModel.success(data, `Role created`));
   }
 
   //On check of permission allow to update role
   static async updateRolePermissions(req: any, res: Response) {
-    var data = await AdminDatabase.updateRolePermissions(req,req.currentUser.id);
+    var data = await AdminDatabase.updateRolePermissions(req);
     res.status(200).send(ResponseModel.success(data, `Role updated`));
   }
 
