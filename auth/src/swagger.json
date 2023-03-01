@@ -34,13 +34,18 @@
     }
   ],
   "schemes": [],
-  "securityDefinitions": {},
+  "securityDefinitions": {
+    "AdminJWT": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter the token with the `Bearer: ` prefix, e.g. Bearer abcde12345"
+    }
+  },
   "paths": {
     "/api/users/admin/login": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
         "parameters": [
           {
@@ -74,15 +79,37 @@
     },
     "/api/users/admin/permission": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "token",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tableName": {
+                  "example": "string"
+                },
+                "isRead": {
+                  "example": "bool"
+                },
+                "isUpdate": {
+                  "example": "bool"
+                },
+                "isDelete": {
+                  "example": "bool"
+                },
+                "isCreate": {
+                  "example": "bool"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -94,16 +121,14 @@
     },
     "/api/users/admin/create/role": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "token",
-            "in": "header",
-            "type": "string"
-          },
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
           {
             "name": "body",
             "in": "body",
@@ -114,7 +139,7 @@
                   "example": "any"
                 },
                 "permissionId": {
-                  "example": "any"
+                  "example": "[id]"
                 }
               }
             }
@@ -129,14 +154,87 @@
     },
     "/api/users/admin/update/rolepermissions": {
       "put": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "token",
-            "in": "header",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "roleId": {
+                  "example": "string"
+                },
+                "permissionId": {
+                  "example": "[id]"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/update/adminrole": {
+      "put": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "string"
+                },
+                "roleId": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/updatestatus/{id}": {
+      "put": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -149,30 +247,38 @@
     },
     "/api/users/admin/addadmin": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
-        "parameters": [
+
+        "security": [
           {
-            "name": "token",
-            "in": "header",
-            "type": "string"
-          },
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
           {
             "name": "body",
             "in": "body",
             "schema": {
               "type": "object",
               "properties": {
+                "userName": {
+                  "example": "string"
+                },
+                "password": {
+                  "example": "string"
+                },
                 "email": {
-                  "example": "any"
+                  "example": "string"
                 },
                 "phoneNumber": {
-                  "example": "any"
+                  "example": "string"
                 },
                 "countryCode": {
-                  "example": "any"
+                  "example": "+91"
+                },
+                "roleId": {
+                  "example": "string"
                 }
               }
             }
@@ -187,16 +293,311 @@
     },
     "/api/users/admin/adduser": {
       "post": {
-        "tags": [
-          "admin"
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
         ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userName": {
+                  "example": "string"
+                },
+                "password": {
+                  "example": "string"
+                },
+                "email": {
+                  "example": "string"
+                },
+                "phoneNumber": {
+                  "example": "string"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getpermissions": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getalllist": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadmins/{id}": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadmins": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadminroles/{id}": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadminroles": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getlistbystatus": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "isActive",
+            "in": "query",
+            "type": "bool"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadminbyname": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userName",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/forgotpassword/sendotp": {
+      "post": {
+        "tags": ["admin"],
         "description": "",
         "parameters": [
           {
-            "name": "token",
-            "in": "header",
-            "type": "string"
-          },
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/forgotpassword/verifyotp": {
+      "post": {
+        "tags": ["admin"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "example": "string"
+                },
+                "password": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/changepassword": {
+      "post": {
+        "tags": ["admin"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "oldPassword": {
+                  "example": "string"
+                },
+                "newPassword": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "//Customer": "--------------------------------------Customer------------------------------------",
+
+    "/api/users/customer/signup": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
           {
             "name": "body",
             "in": "body",
@@ -223,15 +624,809 @@
         }
       }
     },
-    "/api/users/admin/getadmins": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
+    "/api/users/customer/signin": {
+      "post": {
+        "tags": ["customers"],
         "description": "",
         "parameters": [
           {
-            "name": "token",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                },
+                "phoneNumber": {
+                  "example": "any"
+                },
+                "countryCode": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/updateprofile/{id}": {
+      "put": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/changepassword": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/forgotpassword/sendotp": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/forgotpassword/verifyotp": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/delete/{id}": {
+      "delete": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/sendemail": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/sendsms": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/verifyemail": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/verifyphone": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/getcustomers": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/getlistbystatus": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/getlistbyname": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/deletedcustomers": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/currentuser": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/refreshtoken": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/customer/signout": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/create": {
+      "post": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/update/{id}": {
+      "put": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/delete/{id}": {
+      "delete": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/getaddress/single/{id}": {
+      "get": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/getaddress/{customerId}": {
+      "get": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/create": {
+      "post": {
+        "tags": ["country"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/country/update/{id}": {
+      "put": {
+        "tags": ["country"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/delete/{id}": {
+      "delete": {
+        "tags": ["country"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/getcountries": {
+      "get": {
+        "tags": ["country"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/getlistbystatus": {
+      "get": {
+        "tags": ["country"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/getlistbyname": {
+      "get": {
+        "tags": ["country"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/create": {
+      "post": {
+        "tags": ["state"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/state/update/{id}": {
+      "put": {
+        "tags": ["state"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/delete/{id}": {
+      "delete": {
+        "tags": ["state"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/getstates": {
+      "get": {
+        "tags": ["state"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/getlistbystatus": {
+      "get": {
+        "tags": ["state"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/getlistbyname": {
+      "get": {
+        "tags": ["state"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/create": {
+      "post": {
+        "tags": ["city"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/city/update/{id}": {
+      "put": {
+        "tags": ["city"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/delete/{id}": {
+      "delete": {
+        "tags": ["city"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/getcities": {
+      "get": {
+        "tags": ["city"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/getlistbystatus": {
+      "get": {
+        "tags": ["city"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/getlistbyname": {
+      "get": {
+        "tags": ["city"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
             "in": "header",
             "type": "string"
           }

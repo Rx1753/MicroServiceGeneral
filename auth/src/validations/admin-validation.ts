@@ -97,7 +97,7 @@ export class Validation {
   ];
 
   static createRoleValidation = [
-    body('roleName').notEmpty().withMessage('Please provide tableName'),
+    body('roleName').notEmpty().withMessage('Please provide roleName'),
     //body('permissionId').notEmpty().withMessage('permissionId is required'),
     body('permissionId')
       .isArray()
