@@ -15,7 +15,7 @@ interface customerAddressAttrs {
   cityId: string;
   stateId: string;
   countryId: string;
-  zipCode: number;
+  zipCode: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -32,7 +32,7 @@ interface customerAddressDoc extends mongoose.Document {
   cityId: CityDoc;
   stateId: StateDoc;
   countryId: CountryDoc;
-  zipCode: number;
+  zipCode: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -55,7 +55,7 @@ const customerAddressSchema = new mongoose.Schema(
     cityId: { type: String, ref: 'City' },
     stateId: { type: String, ref: 'State' },
     countryId: { type: String, ref: 'Country' },
-    zipCode: { type: Number },
+    zipCode: { type: String },
   },
   {
     toJSON: {

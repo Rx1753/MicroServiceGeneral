@@ -224,7 +224,7 @@ export class AdminDatabase {
   }
 
   static async addUserToAdminTable(req: any, isAdmin: boolean) {
-    const {
+    var {
       userName,
       email,
       password,
@@ -234,9 +234,15 @@ export class AdminDatabase {
       countryCode,
       rolesArray,
     } = req.body;
-    const roleCheck = await AdminRole.findById(roleId);
-    if (!roleCheck) {
-      throw new BadRequestError('Invalid role id');
+    if (isAdmin && roleId === null) {
+      const roleCheck = await AdminRole.findOne({ name: 'Admin' });
+      console.log(`Admin role id ::  ${roleCheck?.id}`);
+      roleId = roleCheck?.id;
+    } else {
+      const roleCheck = await AdminRole.findById(roleId);
+      if (!roleCheck) {
+        throw new BadRequestError('Invalid role id');
+      }
     }
     var user: AdminAttrs;
     const hashPassword = await Password.toHash(password);
@@ -279,33 +285,36 @@ export class AdminDatabase {
       user.email = email;
     }
     //Role permission logic
-    const roleDataArr: string[] = [];
-    rolesArray.forEach((e: any) => {
-      if (!roleDataArr.includes(e.tableName)) {
-        roleDataArr.push(e.tableName);
-      } else {
-        throw new BadRequestError('Repeating table is not possible');
-      }
-    });
-    var permissionRoleId: { _id: string }[] = [];
-    await Promise.all(
-      rolesArray.map(async (e: any) => {
-        const permissionRoleMap = await this.checkRoleMapping(
-          e.tableName,
-          e.isCreate,
-          e.isUpdate,
-          e.isDelete,
-          e.isRead
-        );
-        permissionRoleId.push(permissionRoleMap);
-        const roleMappingData = AdminRoleMapping.build({
-          roleId: roleId,
-          permissionId: permissionRoleMap._id,
-        });
-        await roleMappingData.save();
-      })
-    );
-    console.log(`permissionRoleId :: ${JSON.stringify(permissionRoleId)}`);
+    if (rolesArray != null && rolesArray.length > 0) {
+      const roleDataArr: string[] = [];
+      rolesArray.forEach((e: any) => {
+        if (!roleDataArr.includes(e.tableName)) {
+          roleDataArr.push(e.tableName);
+        } else {
+          throw new BadRequestError('Repeating table is not possible');
+        }
+      });
+      var permissionRoleId: { _id: string }[] = [];
+      await Promise.all(
+        rolesArray.map(async (e: any) => {
+          const permissionRoleMap = await this.checkRoleMapping(
+            e.tableName,
+            e.isCreate,
+            e.isUpdate,
+            e.isDelete,
+            e.isRead
+          );
+          permissionRoleId.push(permissionRoleMap);
+          const roleMappingData = AdminRoleMapping.build({
+            roleId: roleId,
+            permissionId: permissionRoleMap._id,
+          });
+          await roleMappingData.save();
+        })
+      );
+      console.log(`permissionRoleId :: ${JSON.stringify(permissionRoleId)}`);
+    }
+
     const adminData = Admin.build(user);
     adminData.createdBy = req.currentUser.id;
     await adminData.save();

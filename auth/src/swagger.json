@@ -40,6 +40,12 @@
       "in": "header",
       "name": "Authorization",
       "description": "Enter the token with the `Bearer: ` prefix, e.g. Bearer abcde12345"
+    },
+    "CustomerJWT": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter the token with the `Bearer: ` prefix, e.g. Bearer abcde12345"
     }
   },
   "paths": {
@@ -52,21 +58,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "example": "any"
-                },
-                "phoneNumber": {
-                  "example": "any"
-                },
-                "countryCode": {
-                  "example": "any"
-                },
-                "password": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/AdminLogin"
             }
           }
         ],
@@ -91,24 +83,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "tableName": {
-                  "example": "string"
-                },
-                "isRead": {
-                  "example": "bool"
-                },
-                "isUpdate": {
-                  "example": "bool"
-                },
-                "isDelete": {
-                  "example": "bool"
-                },
-                "isCreate": {
-                  "example": "bool"
-                }
-              }
+              "$ref": "#/definitions/Permissions"
             }
           }
         ],
@@ -133,15 +108,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "roleName": {
-                  "example": "any"
-                },
-                "permissionId": {
-                  "example": "[id]"
-                }
-              }
+              "$ref": "#/definitions/Roles"
             }
           }
         ],
@@ -156,7 +123,6 @@
       "put": {
         "tags": ["admin"],
         "description": "",
-
         "security": [
           {
             "AdminJWT": []
@@ -173,7 +139,7 @@
                   "example": "string"
                 },
                 "permissionId": {
-                  "example": "[id]"
+                  "$ref": "#/definitions/PermissionsIds"
                 }
               }
             }
@@ -260,27 +226,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "userName": {
-                  "example": "string"
-                },
-                "password": {
-                  "example": "string"
-                },
-                "email": {
-                  "example": "string"
-                },
-                "phoneNumber": {
-                  "example": "string"
-                },
-                "countryCode": {
-                  "example": "+91"
-                },
-                "roleId": {
-                  "example": "string"
-                }
-              }
+              "$ref": "#/definitions/AdminUser"
             }
           }
         ],
@@ -306,24 +252,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "userName": {
-                  "example": "string"
-                },
-                "password": {
-                  "example": "string"
-                },
-                "email": {
-                  "example": "string"
-                },
-                "phoneNumber": {
-                  "example": "string"
-                },
-                "countryCode": {
-                  "example": "+91"
-                }
-              }
+              "$ref": "#/definitions/AdminUser"
             }
           }
         ],
@@ -399,13 +328,23 @@
       "get": {
         "tags": ["admin"],
         "description": "",
-
         "security": [
           {
             "AdminJWT": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "pageNo",
+            "in": "query",
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -470,7 +409,7 @@
           {
             "name": "isActive",
             "in": "query",
-            "type": "bool"
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -602,18 +541,7 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "example": "any"
-                },
-                "phoneNumber": {
-                  "example": "any"
-                },
-                "countryCode": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/Customer"
             }
           }
         ],
@@ -636,16 +564,16 @@
               "type": "object",
               "properties": {
                 "email": {
-                  "example": "any"
+                  "description": "abc@gmail.com"
                 },
                 "phoneNumber": {
-                  "example": "any"
+                  "description": "0000000011"
                 },
                 "countryCode": {
-                  "example": "any"
+                  "description": "+91"
                 },
                 "password": {
-                  "example": "any"
+                  "description": "password with pattern"
                 }
               }
             }
@@ -662,6 +590,11 @@
       "put": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -670,9 +603,34 @@
             "type": "string"
           },
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "example": "string"
+                },
+                "lastName": {
+                  "example": "string"
+                },
+                "gender": {
+                  "example": "string"
+                },
+                "dob": {
+                  "example": "1996-08-08"
+                },
+                "email": {
+                  "example": "abc@gmail.com"
+                },
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -686,11 +644,26 @@
       "post": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "oldPassword": {
+                  "example": "string"
+                },
+                "newPassword": {
+                  "example": "string"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -704,7 +677,28 @@
       "post": {
         "tags": ["customers"],
         "description": "",
-        "parameters": [],
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -716,7 +710,34 @@
       "post": {
         "tags": ["customers"],
         "description": "",
-        "parameters": [],
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "example": "000000"
+                },
+                "password": {
+                  "example": "string"
+                },
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -728,16 +749,16 @@
       "delete": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -752,11 +773,32 @@
       "post": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isMFA": {
+                  "example": "boolean"
+                },
+                "email": {
+                  "example": "abc@gmail.com"
+                },
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -770,11 +812,23 @@
       "post": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "abc@gmail.com"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -788,11 +842,26 @@
       "post": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -806,11 +875,23 @@
       "post": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "email code should add in this field"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -824,11 +905,23 @@
       "post": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "phone otp would be sent to this field"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -842,10 +935,20 @@
       "get": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
+            "name": "pageNo",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
             "type": "string"
           }
         ],
@@ -860,11 +963,16 @@
       "get": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "isActive",
+            "in": "query",
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -878,10 +986,15 @@
       "get": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
+            "name": "searchName",
+            "in": "query",
             "type": "string"
           }
         ],
@@ -896,10 +1009,20 @@
       "get": {
         "tags": ["customers"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
+            "name": "pageNo",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
             "type": "string"
           }
         ],
@@ -914,13 +1037,12 @@
       "get": {
         "tags": ["customers"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -932,13 +1054,12 @@
       "get": {
         "tags": ["customers"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "201": {
             "description": "Created"
@@ -950,13 +1071,12 @@
       "post": {
         "tags": ["customers"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -964,15 +1084,25 @@
         }
       }
     },
+
+    "//Customer Address": "--------------------------------------Customer Address------------------------------------",
+
     "/api/users/customer/address/create": {
       "post": {
         "tags": ["customer address"],
         "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CustomerAddress"
+            }
           }
         ],
         "responses": {
@@ -994,9 +1124,11 @@
             "type": "string"
           },
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CustomerAddress"
+            }
           }
         ],
         "responses": {
@@ -1015,11 +1147,6 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -1040,11 +1167,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -1064,11 +1186,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
@@ -1078,15 +1195,30 @@
         }
       }
     },
+
+    "//Country": "--------------------------------------Country------------------------------------",
+
     "/api/users/country/create": {
       "post": {
         "tags": ["country"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "countryName": {
+                  "description": "Country name "
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1096,10 +1228,16 @@
         }
       }
     },
+
     "/api/users/country/update/{id}": {
       "put": {
         "tags": ["country"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1108,9 +1246,21 @@
             "type": "string"
           },
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "countryName": {
+                  "type": "string",
+                  "description": "Country name "
+                },
+                "isActive": {
+                  "type": "boolean",
+                  "description": "update the status with true/false"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1124,16 +1274,16 @@
       "delete": {
         "tags": ["country"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -1148,13 +1298,15 @@
       "get": {
         "tags": ["country"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -1166,11 +1318,20 @@
       "get": {
         "tags": ["country"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "isActive",
+            "in": "query",
+            "required": true,
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -1184,10 +1345,19 @@
       "get": {
         "tags": ["country"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
+            "name": "countryName",
+            "in": "query",
+            "required": true,
             "type": "string"
           }
         ],
@@ -1198,15 +1368,33 @@
         }
       }
     },
+
+    "//State": "--------------------------------------State------------------------------------",
+
     "/api/users/state/create": {
       "post": {
         "tags": ["state"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stateName": {
+                  "description": "State name"
+                },
+                "countryId": {
+                  "description": "Country id would be required to bind the state to country"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1220,6 +1408,11 @@
       "put": {
         "tags": ["state"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1228,9 +1421,22 @@
             "type": "string"
           },
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stateName": {
+                  "description": "State name"
+                },
+                "countryId": {
+                  "description": "Country id would be required to bind the state to country"
+                },
+                "isActive": {
+                  "description": "provide true/false for active status"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1244,16 +1450,16 @@
       "delete": {
         "tags": ["state"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -1268,13 +1474,15 @@
       "get": {
         "tags": ["state"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -1286,13 +1494,15 @@
       "get": {
         "tags": ["state"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -1304,13 +1514,15 @@
       "get": {
         "tags": ["state"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -1318,15 +1530,33 @@
         }
       }
     },
+
+    "//City": "--------------------------------------City------------------------------------",
+
     "/api/users/city/create": {
       "post": {
         "tags": ["city"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cityName": {
+                  "description": "City name"
+                },
+                "stateId": {
+                  "description": "State id to bind the city with"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1340,6 +1570,11 @@
       "put": {
         "tags": ["city"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1348,9 +1583,22 @@
             "type": "string"
           },
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cityName": {
+                  "description": "City name"
+                },
+                "stateId": {
+                  "description": "State id to bind the city with"
+                },
+                "isActive": {
+                  "description": "provide true/false for active status"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1364,16 +1612,16 @@
       "delete": {
         "tags": ["city"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -1388,13 +1636,15 @@
       "get": {
         "tags": ["city"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -1406,13 +1656,15 @@
       "get": {
         "tags": ["city"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -1424,13 +1676,15 @@
       "get": {
         "tags": ["city"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
           }
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -1439,5 +1693,194 @@
       }
     }
   },
+
+  "definitions": {
+    "AdminLogin": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "login with email/phone no"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "login with email/phone no"
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "country code of phone number"
+        },
+        "password": {
+          "type": "string",
+          "description": "admin password"
+        }
+      }
+    },
+    "Permissions": {
+      "type": "object",
+      "properties": {
+        "tableName": {
+          "type": "string",
+          "description": "Permission for table"
+        },
+        "isCreate": {
+          "type": "boolean",
+          "description": "create access permission"
+        },
+        "isUpdate": {
+          "type": "boolean",
+          "description": "update access permission"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "read access permission"
+        },
+
+        "isDelete": {
+          "type": "boolean",
+          "description": "delete access permission"
+        }
+      }
+    },
+    "Roles": {
+      "type": "object",
+      "properties": {
+        "roleName": {
+          "type": "string",
+          "description": "Create role like Admin, Support"
+        },
+        "permissionId": {
+          "$ref": "#/definitions/PermissionsIds"
+        }
+      }
+    },
+    "PermissionsIds": {
+      "description": "Array of Permission ids [string] for a role",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "AdminUser": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "description": "admin userName"
+        },
+        "password": {
+          "type": "string",
+          "description": "password with pattern"
+        },
+        "email": {
+          "type": "email",
+          "description": "admin email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "admin phoneNumber"
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "+91"
+        },
+        "roleId": {
+          "type": "string",
+          "description": "To assign role to this admin/user"
+        }
+      }
+    },
+    "Customer": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "description": "user name of customer"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "first name"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "last name"
+        },
+        "gender": {
+          "type": "string",
+          "description": "male/female"
+        },
+        "dob": {
+          "type": "string",
+          "description": "1996-08-08"
+        },
+        "password": {
+          "type": "string",
+          "description": "password with pattern"
+        },
+        "email": {
+          "type": "string",
+          "description": "abc@gmail.com"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "0000000011"
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "+91"
+        },
+        "referralCode": {
+          "type": "string",
+          "description": "The code refer by someone would be added in referralCode"
+        }
+      }
+    },
+    "CustomerAddress": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/CustomerAddressModel"
+        }
+      }
+    },
+    "CustomerAddressModel": {
+      "type": "object",
+      "properties": {
+        "addressType": {
+          "type": "string",
+          "description": "Home/Work"
+        },
+        "isDefault": {
+          "type": "boolean",
+          "description": "set true for default address"
+        },
+        "addressLine1": {
+          "type": "string",
+          "description": "Address Line 1"
+        },
+        "addressLine2": {
+          "type": "string",
+          "description": "Address Line 2"
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "000000"
+        },
+        "countryName": {
+          "type": "string",
+          "description": "Country name"
+        },
+        "stateName": {
+          "type": "string",
+          "description": "State"
+        },
+        "cityName": {
+          "type": "string",
+          "description": "City"
+        }
+      }
+    }
+  },
+
   "security": []
 }
