@@ -65,7 +65,7 @@ export const verifyAdminToken = async (
 ) => {
   if (!req.session?.jwt && !req.headers['authorization']) {
     console.log(`Token not provided :: admin`);
-    throw new BadRequestError('Token/Session not provided');
+    throw new BadRequestError('Admin Token/Session not provided');
   } else if (
     req.headers.authorization &&
     req.headers.authorization!.split(' ')[0] !== 'Bearer'

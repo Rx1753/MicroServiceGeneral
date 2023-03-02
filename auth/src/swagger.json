@@ -34,34 +34,31 @@
     }
   ],
   "schemes": [],
-  "securityDefinitions": {},
+  "securityDefinitions": {
+    "AdminJWT": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter the token with the `Bearer: ` prefix, e.g. Bearer abcde12345"
+    },
+    "CustomerJWT": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter the token with the `Bearer: ` prefix, e.g. Bearer abcde12345"
+    }
+  },
   "paths": {
     "/api/users/admin/login": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "example": "any"
-                },
-                "phoneNumber": {
-                  "example": "any"
-                },
-                "countryCode": {
-                  "example": "any"
-                },
-                "password": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/AdminLogin"
             }
           }
         ],
@@ -74,15 +71,20 @@
     },
     "/api/users/admin/permission": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "token",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Permissions"
+            }
           }
         ],
         "responses": {
@@ -94,29 +96,19 @@
     },
     "/api/users/admin/create/role": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
-        "parameters": [
+        "security": [
           {
-            "name": "token",
-            "in": "header",
-            "type": "string"
-          },
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
           {
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "roleName": {
-                  "example": "any"
-                },
-                "permissionId": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/Roles"
             }
           }
         ],
@@ -129,14 +121,86 @@
     },
     "/api/users/admin/update/rolepermissions": {
       "put": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "token",
-            "in": "header",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "roleId": {
+                  "example": "string"
+                },
+                "permissionId": {
+                  "$ref": "#/definitions/PermissionsIds"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/update/adminrole": {
+      "put": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "string"
+                },
+                "roleId": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/updatestatus/{id}": {
+      "put": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -149,32 +213,20 @@
     },
     "/api/users/admin/addadmin": {
       "post": {
-        "tags": [
-          "admin"
-        ],
+        "tags": ["admin"],
         "description": "",
-        "parameters": [
+
+        "security": [
           {
-            "name": "token",
-            "in": "header",
-            "type": "string"
-          },
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
           {
             "name": "body",
             "in": "body",
             "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "example": "any"
-                },
-                "phoneNumber": {
-                  "example": "any"
-                },
-                "countryCode": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/AdminUser"
             }
           }
         ],
@@ -187,14 +239,367 @@
     },
     "/api/users/admin/adduser": {
       "post": {
-        "tags": [
-          "admin"
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
         ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/AdminUser"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getpermissions": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getalllist": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadmins/{id}": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadmins": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pageNo",
+            "in": "query",
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadminroles/{id}": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadminroles": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getlistbystatus": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "isActive",
+            "in": "query",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/getadminbyname": {
+      "get": {
+        "tags": ["admin"],
+        "description": "",
+
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userName",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/forgotpassword/sendotp": {
+      "post": {
+        "tags": ["admin"],
         "description": "",
         "parameters": [
           {
-            "name": "token",
-            "in": "header",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/forgotpassword/verifyotp": {
+      "post": {
+        "tags": ["admin"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "example": "string"
+                },
+                "password": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/admin/changepassword": {
+      "post": {
+        "tags": ["admin"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "oldPassword": {
+                  "example": "string"
+                },
+                "newPassword": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "//Customer": "--------------------------------------Customer------------------------------------",
+
+    "/api/users/customer/signup": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Customer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/customer/signin": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "description": "abc@gmail.com"
+                },
+                "phoneNumber": {
+                  "description": "0000000011"
+                },
+                "countryCode": {
+                  "description": "+91"
+                },
+                "password": {
+                  "description": "password with pattern"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/updateprofile/{id}": {
+      "put": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
             "type": "string"
           },
           {
@@ -203,14 +608,614 @@
             "schema": {
               "type": "object",
               "properties": {
+                "firstName": {
+                  "example": "string"
+                },
+                "lastName": {
+                  "example": "string"
+                },
+                "gender": {
+                  "example": "string"
+                },
+                "dob": {
+                  "example": "1996-08-08"
+                },
                 "email": {
-                  "example": "any"
+                  "example": "abc@gmail.com"
                 },
                 "phoneNumber": {
-                  "example": "any"
+                  "example": "0000000011"
                 },
                 "countryCode": {
-                  "example": "any"
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/changepassword": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "oldPassword": {
+                  "example": "string"
+                },
+                "newPassword": {
+                  "example": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/forgotpassword/sendotp": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/forgotpassword/verifyotp": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "example": "000000"
+                },
+                "password": {
+                  "example": "string"
+                },
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/delete/{id}": {
+      "delete": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isMFA": {
+                  "example": "boolean"
+                },
+                "email": {
+                  "example": "abc@gmail.com"
+                },
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/sendemail": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "abc@gmail.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/sendsms": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phoneNumber": {
+                  "example": "0000000011"
+                },
+                "countryCode": {
+                  "example": "+91"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/verifyemail": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "email code should add in this field"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/mfa/verifyphone": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "phone otp would be sent to this field"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/getcustomers": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pageNo",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/getlistbystatus": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "isActive",
+            "in": "query",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/getlistbyname": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "searchName",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/deletedcustomers": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pageNo",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/currentuser": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/refreshtoken": {
+      "get": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/customer/signout": {
+      "post": {
+        "tags": ["customers"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "//Customer Address": "--------------------------------------Customer Address------------------------------------",
+
+    "/api/users/customer/address/create": {
+      "post": {
+        "tags": ["customer address"],
+        "description": "",
+        "security": [
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CustomerAddress"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/update/{id}": {
+      "put": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CustomerAddress"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/delete/{id}": {
+      "delete": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/getaddress/single/{id}": {
+      "get": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/customer/address/getaddress/{customerId}": {
+      "get": {
+        "tags": ["customer address"],
+        "description": "",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "//Country": "--------------------------------------Country------------------------------------",
+
+    "/api/users/country/create": {
+      "post": {
+        "tags": ["country"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "countryName": {
+                  "description": "Country name "
                 }
               }
             }
@@ -223,16 +1228,62 @@
         }
       }
     },
-    "/api/users/admin/getadmins": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
+
+    "/api/users/country/update/{id}": {
+      "put": {
+        "tags": ["country"],
         "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
         "parameters": [
           {
-            "name": "token",
-            "in": "header",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "countryName": {
+                  "type": "string",
+                  "description": "Country name "
+                },
+                "isActive": {
+                  "type": "boolean",
+                  "description": "update the status with true/false"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/delete/{id}": {
+      "delete": {
+        "tags": ["country"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -242,7 +1293,594 @@
           }
         }
       }
+    },
+    "/api/users/country/getcountries": {
+      "get": {
+        "tags": ["country"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/getlistbystatus": {
+      "get": {
+        "tags": ["country"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "isActive",
+            "in": "query",
+            "required": true,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/country/getlistbyname": {
+      "get": {
+        "tags": ["country"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "countryName",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "//State": "--------------------------------------State------------------------------------",
+
+    "/api/users/state/create": {
+      "post": {
+        "tags": ["state"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stateName": {
+                  "description": "State name"
+                },
+                "countryId": {
+                  "description": "Country id would be required to bind the state to country"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/state/update/{id}": {
+      "put": {
+        "tags": ["state"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "stateName": {
+                  "description": "State name"
+                },
+                "countryId": {
+                  "description": "Country id would be required to bind the state to country"
+                },
+                "isActive": {
+                  "description": "provide true/false for active status"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/delete/{id}": {
+      "delete": {
+        "tags": ["state"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/getstates": {
+      "get": {
+        "tags": ["state"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/getlistbystatus": {
+      "get": {
+        "tags": ["state"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/state/getlistbyname": {
+      "get": {
+        "tags": ["state"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+
+    "//City": "--------------------------------------City------------------------------------",
+
+    "/api/users/city/create": {
+      "post": {
+        "tags": ["city"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cityName": {
+                  "description": "City name"
+                },
+                "stateId": {
+                  "description": "State id to bind the city with"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/api/users/city/update/{id}": {
+      "put": {
+        "tags": ["city"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cityName": {
+                  "description": "City name"
+                },
+                "stateId": {
+                  "description": "State id to bind the city with"
+                },
+                "isActive": {
+                  "description": "provide true/false for active status"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/delete/{id}": {
+      "delete": {
+        "tags": ["city"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/getcities": {
+      "get": {
+        "tags": ["city"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/getlistbystatus": {
+      "get": {
+        "tags": ["city"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/city/getlistbyname": {
+      "get": {
+        "tags": ["city"],
+        "description": "",
+        "security": [
+          {
+            "AdminJWT": []
+          },
+          {
+            "CustomerJWT": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
+
+  "definitions": {
+    "AdminLogin": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "login with email/phone no"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "login with email/phone no"
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "country code of phone number"
+        },
+        "password": {
+          "type": "string",
+          "description": "admin password"
+        }
+      }
+    },
+    "Permissions": {
+      "type": "object",
+      "properties": {
+        "tableName": {
+          "type": "string",
+          "description": "Permission for table"
+        },
+        "isCreate": {
+          "type": "boolean",
+          "description": "create access permission"
+        },
+        "isUpdate": {
+          "type": "boolean",
+          "description": "update access permission"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "read access permission"
+        },
+
+        "isDelete": {
+          "type": "boolean",
+          "description": "delete access permission"
+        }
+      }
+    },
+    "Roles": {
+      "type": "object",
+      "properties": {
+        "roleName": {
+          "type": "string",
+          "description": "Create role like Admin, Support"
+        },
+        "permissionId": {
+          "$ref": "#/definitions/PermissionsIds"
+        }
+      }
+    },
+    "PermissionsIds": {
+      "description": "Array of Permission ids [string] for a role",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "AdminUser": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "description": "admin userName"
+        },
+        "password": {
+          "type": "string",
+          "description": "password with pattern"
+        },
+        "email": {
+          "type": "email",
+          "description": "admin email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "admin phoneNumber"
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "+91"
+        },
+        "roleId": {
+          "type": "string",
+          "description": "To assign role to this admin/user"
+        }
+      }
+    },
+    "Customer": {
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "description": "user name of customer"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "first name"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "last name"
+        },
+        "gender": {
+          "type": "string",
+          "description": "male/female"
+        },
+        "dob": {
+          "type": "string",
+          "description": "1996-08-08"
+        },
+        "password": {
+          "type": "string",
+          "description": "password with pattern"
+        },
+        "email": {
+          "type": "string",
+          "description": "abc@gmail.com"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "0000000011"
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "+91"
+        },
+        "referralCode": {
+          "type": "string",
+          "description": "The code refer by someone would be added in referralCode"
+        }
+      }
+    },
+    "CustomerAddress": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/CustomerAddressModel"
+        }
+      }
+    },
+    "CustomerAddressModel": {
+      "type": "object",
+      "properties": {
+        "addressType": {
+          "type": "string",
+          "description": "Home/Work"
+        },
+        "isDefault": {
+          "type": "boolean",
+          "description": "set true for default address"
+        },
+        "addressLine1": {
+          "type": "string",
+          "description": "Address Line 1"
+        },
+        "addressLine2": {
+          "type": "string",
+          "description": "Address Line 2"
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "000000"
+        },
+        "countryName": {
+          "type": "string",
+          "description": "Country name"
+        },
+        "stateName": {
+          "type": "string",
+          "description": "State"
+        },
+        "cityName": {
+          "type": "string",
+          "description": "City"
+        }
+      }
+    }
+  },
+
   "security": []
 }
